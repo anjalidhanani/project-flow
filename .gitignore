@@ -121,10 +121,9 @@ uploads/
 # Project Management Tool Specific
 project-logs/
 user-uploads/
-temp-files/
+temp-files/xw
 backup/
 generated/
-reports/
 exports/
 
 # IDE and editor files
