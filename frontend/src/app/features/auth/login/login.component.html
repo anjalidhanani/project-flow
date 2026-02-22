@@ -1,0 +1,148 @@
+<div class="auth-container">
+  <!-- Background Elements -->
+  <div class="auth-background">
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    <div class="bg-shape shape-3"></div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="auth-content">
+    <!-- Left Side - Branding -->
+    <div class="auth-branding">
+      <div class="brand-content">
+        <div class="brand-logo">
+          <div class="logo-icon">
+            <mat-icon>rocket_launch</mat-icon>
+          </div>
+          <h1 class="brand-title">ProjectFlow</h1>
+        </div>
+        <h2 class="brand-headline">Manage projects like a pro</h2>
+        <p class="brand-description">
+          Streamline your workflow, collaborate seamlessly, and deliver exceptional results with our comprehensive project management platform.
+        </p>
+        
+        <div class="feature-highlights">
+          <div class="feature-item">
+            <div class="feature-icon">
+              <mat-icon>dashboard</mat-icon>
+            </div>
+            <div class="feature-text">
+              <h4>Intuitive Dashboard</h4>
+              <p>Get insights at a glance</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">
+              <mat-icon>groups</mat-icon>
+            </div>
+            <div class="feature-text">
+              <h4>Team Collaboration</h4>
+              <p>Work together seamlessly</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">
+              <mat-icon>analytics</mat-icon>
+            </div>
+            <div class="feature-text">
+              <h4>Advanced Analytics</h4>
+              <p>Track progress and performance</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side - Login Form -->
+    <div class="auth-form-container">
+      <div class="auth-form">
+        <!-- Header -->
+        <div class="form-header">
+          <h2 class="form-title">Welcome back</h2>
+          <p class="form-subtitle">Sign in to your account to continue</p>
+        </div>
+
+        <!-- Login Form -->
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+          <!-- Email Field -->
+          <div class="form-field">
+            <label class="field-label">Email Address</label>
+            <div class="input-container">
+              <mat-icon class="input-icon">email</mat-icon>
+              <input type="email" 
+                     class="form-input"
+                     placeholder="Enter your email"
+                     formControlName="email"
+                     [class.error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+            </div>
+            <div class="field-errors" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+              <span *ngIf="loginForm.get('email')?.hasError('required')" class="error-message">
+                Email is required
+              </span>
+              <span *ngIf="loginForm.get('email')?.hasError('email')" class="error-message">
+                Please enter a valid email address
+              </span>
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="form-field">
+            <label class="field-label">Password</label>
+            <div class="input-container">
+              <mat-icon class="input-icon">lock</mat-icon>
+              <input [type]="hidePassword ? 'password' : 'text'" 
+                     class="form-input"
+                     placeholder="Enter your password"
+                     formControlName="password"
+                     [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+              <button type="button" 
+                      class="toggle-password" 
+                      (click)="hidePassword = !hidePassword">
+                <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+            </div>
+            <div class="field-errors" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+              <span *ngIf="loginForm.get('password')?.hasError('required')" class="error-message">
+                Password is required
+              </span>
+            </div>
+          </div>
+
+          <!-- Remember Me & Forgot Password -->
+          <div class="form-options">
+            <label class="checkbox-container">
+              <input type="checkbox" class="checkbox">
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Remember me</span>
+            </label>
+            <a href="#" class="forgot-password">Forgot password?</a>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" 
+                  class="submit-btn"
+                  [disabled]="loginForm.invalid || isLoading">
+            <div class="btn-content" *ngIf="!isLoading">
+              <mat-icon>login</mat-icon>
+              <span>Sign In</span>
+            </div>
+            <div class="btn-loading" *ngIf="isLoading">
+              <div class="loading-spinner"></div>
+              <span>Signing in...</span>
+            </div>
+          </button>
+
+        </form>
+
+        <!-- Footer -->
+        <div class="form-footer">
+          <p class="signup-prompt">
+            Don't have an account? 
+            <a routerLink="/register" class="signup-link">Create one now</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

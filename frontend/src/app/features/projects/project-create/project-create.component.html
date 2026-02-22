@@ -1,0 +1,170 @@
+<div class="modern-create-container">
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="breadcrumb">
+        <button class="breadcrumb-btn" mat-button (click)="cancel()">
+          <mat-icon>arrow_back</mat-icon>
+          Back
+        </button>
+        
+      </div>
+      <h1 class="page-title">Create New Project</h1>
+      <p class="page-subtitle">Set up your project with all the essential details to get your team started</p>
+    </div>
+  </div>
+
+  <!-- Main Form Card -->
+  <div class="form-container">
+    <div class="form-card">
+      <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="project-form">
+        
+        <!-- Basic Information Section -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <mat-icon>info</mat-icon>
+            </div>
+            <div class="section-title">
+              <h3>Basic Information</h3>
+              <p>Essential details about your project</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="modern-field">
+                <mat-label>Project Name</mat-label>
+                <input matInput formControlName="name" placeholder="Enter project name" required>
+                <mat-icon matPrefix>work</mat-icon>
+                <mat-error *ngIf="projectForm.get('name')?.hasError('required')">
+                  Project name is required
+                </mat-error>
+                <mat-error *ngIf="projectForm.get('name')?.hasError('maxlength')">
+                  Project name must be less than 100 characters
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-field-wrapper full-width">
+              <mat-form-field appearance="outline" class="modern-field">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description" 
+                         placeholder="Describe your project goals and objectives" 
+                         rows="4" required></textarea>
+                <mat-icon matPrefix>description</mat-icon>
+                <mat-error *ngIf="projectForm.get('description')?.hasError('required')">
+                  Description is required
+                </mat-error>
+                <mat-error *ngIf="projectForm.get('description')?.hasError('maxlength')">
+                  Description must be less than 500 characters
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline Section -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <mat-icon>schedule</mat-icon>
+            </div>
+            <div class="section-title">
+              <h3>Timeline</h3>
+              <p>Set your project duration and milestones</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="modern-field">
+                <mat-label>Start Date</mat-label>
+                <input matInput [matDatepicker]="startPicker" formControlName="startDate" 
+                       placeholder="Select start date" required>
+                <mat-icon matPrefix>event</mat-icon>
+                <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+                <mat-datepicker #startPicker></mat-datepicker>
+                <mat-error *ngIf="projectForm.get('startDate')?.hasError('required')">
+                  Start date is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="modern-field">
+                <mat-label>End Date</mat-label>
+                <input matInput [matDatepicker]="endPicker" formControlName="endDate" 
+                       placeholder="Select end date" required>
+                <mat-icon matPrefix>event</mat-icon>
+                <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+                <mat-datepicker #endPicker></mat-datepicker>
+                <mat-error *ngIf="projectForm.get('endDate')?.hasError('required')">
+                  End date is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project Settings Section -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <mat-icon>settings</mat-icon>
+            </div>
+            <div class="section-title">
+              <h3>Project Settings</h3>
+              <p>Configure priority and other project settings</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="modern-field">
+                <mat-label>Priority Level</mat-label>
+                <mat-select formControlName="priority" placeholder="Select priority">
+                  <mat-option value="low">Low Priority</mat-option>
+                  <mat-option value="medium">Medium Priority</mat-option>
+                  <mat-option value="high">High Priority</mat-option>
+                  <mat-option value="urgent">Urgent</mat-option>
+                </mat-select>
+                <mat-icon matPrefix>flag</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="modern-field">
+                <mat-label>Project Color</mat-label>
+                <mat-select formControlName="color" placeholder="Choose project color">
+                  <mat-option value="#667eea">Blue</mat-option>
+                  <mat-option value="#4facfe">Cyan</mat-option>
+                  <mat-option value="#43e97b">Green</mat-option>
+                  <mat-option value="#fa709a">Pink</mat-option>
+                  <mat-option value="#ffd93d">Yellow</mat-option>
+                  <mat-option value="#a8a8a8">Gray</mat-option>
+                </mat-select>
+                <mat-icon matPrefix>palette</mat-icon>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button mat-stroked-button type="button" class="cancel-btn" (click)="cancel()" [disabled]="isLoading">
+            <mat-icon>close</mat-icon>
+            Cancel
+          </button>
+          <button mat-flat-button color="primary" type="submit" class="submit-btn" 
+                  [disabled]="projectForm.invalid || isLoading">
+            <mat-icon *ngIf="!isLoading">add_circle</mat-icon>
+            <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+            {{ isLoading ? 'Creating...' : 'Create Project' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,364 @@
+.calendar-container {
+  padding: 20px;
+  height: calc(100vh - 40px);
+  overflow: hidden;
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 16px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+
+  .calendar-title {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 600;
+      color: #1a202c;
+    }
+
+    .calendar-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .today-btn {
+        background-color: #f7fafc;
+        border-radius: 8px;
+        font-weight: 500;
+        
+        &:hover {
+          background-color: #edf2f7;
+        }
+      }
+    }
+  }
+
+  .calendar-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    
+
+    .view-toggle {
+      display: flex;
+      background-color: #f7fafc;
+      border-radius: 8px;
+      padding: 4px;
+
+      button {
+        border-radius: 6px;
+        font-weight: 500;
+        
+        &.active {
+          background-color: white;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+      }
+    }
+  }
+}
+
+// Month View Styles
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background-color: #e5e7eb;
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  .weekday {
+    background-color: #f9fafb;
+    padding: 14px 8px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #6b7280;
+    letter-spacing: 0.025em;
+  }
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-rows: repeat(6, auto);
+  gap: 1px;
+  background-color: #e5e7eb;
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+
+  .calendar-week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+  }
+}
+
+.calendar-day {
+  background-color: white;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 80px;
+
+  &:hover {
+    background-color: #f9fafb;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    
+    .day-number {
+      background-color: #f3f4f6;
+    }
+  }
+
+  &.other-month {
+    background-color: #f9fafb;
+    color: #9ca3af;
+    
+    .day-number {
+      opacity: 0.5;
+    }
+    
+    &:hover {
+      background-color: #f3f4f6;
+      box-shadow: none;
+    }
+  }
+
+  &.today {
+    background-color: #eff6ff;
+    border: 2px solid #3b82f6;
+    
+    .day-number {
+      background-color: #3b82f6;
+      color: white;
+      font-weight: 700;
+    }
+  }
+
+  &.selected {
+    background-color: #dbeafe;
+    border: 2px solid #2563eb;
+    
+    .day-number {
+      background-color: #2563eb;
+      color: white;
+      font-weight: 700;
+    }
+  }
+
+  .day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    flex-shrink: 0;
+
+    .day-number {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #374151;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .day-actions {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+
+      .add-event-btn {
+        width: 20px;
+        height: 20px;
+        line-height: 20px;
+
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+  }
+
+  &:hover .day-actions {
+    opacity: 1;
+  }
+
+  .day-events {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: visible;
+  }
+
+  .event-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 18px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1px;
+
+    &:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .event-icon {
+      font-size: 12px;
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+    }
+
+    .event-title {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+
+    .event-time {
+      display: none;
+    }
+  }
+
+  .more-events {
+    font-size: 0.6rem;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 2px 4px;
+    text-align: center;
+    background-color: #f3f4f6;
+    border-radius: 3px;
+    margin-top: 1px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    min-height: 14px;
+    max-height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    &:hover {
+      color: #374151;
+      background-color: #e5e7eb;
+    }
+  }
+
+  .task-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 10;
+    pointer-events: none;
+    
+    ::ng-deep .mat-badge-content {
+      width: 18px !important;
+      height: 18px !important;
+      line-height: 16px !important;
+      font-size: 10px !important;
+      font-weight: 700 !important;
+      border-radius: 9px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+      border: 1px solid white !important;
+      min-width: 18px !important;
+      text-align: center !important;
+      transform: translateX(-9px) translateY(9px) !important;
+    }
+  }
+}
+
+// Clean, professional calendar styling without excessive animations
+
+
+
+// Responsive Design
+@media (max-width: 768px) {
+  .calendar-container {
+    padding: 16px;
+  }
+
+  .calendar-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+
+    .calendar-title {
+      justify-content: space-between;
+
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    .calendar-actions {
+      justify-content: space-between;
+    }
+  }
+
+  .calendar-day {
+    min-height: 80px;
+    padding: 4px;
+
+    .day-header .day-actions {
+      opacity: 1;
+    }
+
+    .event-item {
+      font-size: 0.7rem;
+      padding: 1px 4px;
+
+      .event-icon {
+        display: none;
+      }
+    }
+  }
+
+  .day-view .day-header-detail {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+
+    h2 {
+      text-align: center;
+    }
+  }
+}

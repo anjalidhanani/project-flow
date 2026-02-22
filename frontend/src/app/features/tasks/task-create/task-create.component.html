@@ -1,0 +1,220 @@
+<div class="modern-create-container">
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="breadcrumb">
+        <button class="breadcrumb-btn" mat-button (click)="cancel()">
+          <mat-icon>arrow_back</mat-icon>
+          Back
+        </button>
+      </div>
+      <h1 class="page-title">Create New Task</h1>
+      <p class="page-subtitle">Break down your work into manageable tasks and assign them to team members</p>
+    </div>
+  </div>
+
+  <!-- Main Form Card -->
+  <div class="form-container">
+    <div class="form-card">
+      <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="task-form">
+        
+        <!-- Task Details Section -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <mat-icon>task</mat-icon>
+            </div>
+            <div class="section-title">
+              <h3>Task Details</h3>
+              <p>Define what needs to be accomplished</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field-wrapper full-width">
+              <mat-form-field appearance="outline" class="modern-field">
+                <mat-label>Task Title</mat-label>
+                <input matInput formControlName="title" placeholder="Enter a clear, actionable task title" required>
+                <mat-icon matPrefix>assignment</mat-icon>
+                <mat-error *ngIf="taskForm.get('title')?.hasError('required')">
+                  Task title is required
+                </mat-error>
+                <mat-error *ngIf="taskForm.get('title')?.hasError('maxlength')">
+                  Task title must be less than 100 characters
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-field-wrapper full-width">
+              <mat-form-field appearance="outline" class="modern-field">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description" 
+                         placeholder="Provide detailed instructions and context for this task" 
+                         rows="4"></textarea>
+                <mat-icon matPrefix>description</mat-icon>
+                <mat-hint>Optional: Add any additional context or requirements</mat-hint>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project Assignment Section -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <mat-icon>folder</mat-icon>
+            </div>
+            <div class="section-title">
+              <h3>Project Assignment</h3>
+              <p>Link this task to a project</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field-wrapper full-width">
+              <mat-form-field appearance="outline" class="modern-field">
+                <mat-label>Select Project</mat-label>
+                <mat-select formControlName="project" placeholder="Choose a project" required>
+                  <mat-option *ngFor="let project of projects" [value]="project._id">
+                    <div class="project-option">
+                      <div class="project-indicator" [style.background-color]="project.color || '#667eea'"></div>
+                      <div class="project-info">
+                        <span class="project-name">{{ project.name }}</span>
+                      </div>
+                    </div>
+                  </mat-option>
+                </mat-select>
+                <mat-icon matPrefix>work</mat-icon>
+                <mat-error *ngIf="taskForm.get('project')?.hasError('required')">
+                  Please select a project
+                </mat-error>
+                <mat-hint *ngIf="projects.length === 0">No projects available. Create a project first.</mat-hint>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Task Configuration Section -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <mat-icon>tune</mat-icon>
+            </div>
+            <div class="section-title">
+              <h3>Task Configuration</h3>
+              <p>Set priority, timeline, and effort estimates</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="modern-field">
+                <mat-label>Priority Level</mat-label>
+                <mat-select formControlName="priority" placeholder="Select priority">
+                  <mat-option value="low">Low Priority</mat-option>
+                  <mat-option value="medium">Medium Priority</mat-option>
+                  <mat-option value="high">High Priority</mat-option>
+                  <mat-option value="urgent">Urgent</mat-option>
+                </mat-select>
+                <mat-icon matPrefix>flag</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="modern-field">
+                <mat-label>Task Status</mat-label>
+                <mat-select formControlName="status" placeholder="Select initial status">
+                  <mat-option value="todo">To Do</mat-option>
+                  <mat-option value="in-progress">In Progress</mat-option>
+                </mat-select>
+                <mat-icon matPrefix>track_changes</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="modern-field">
+                <mat-label>Due Date</mat-label>
+                <input matInput [matDatepicker]="duePicker" formControlName="dueDate" 
+                       placeholder="Set deadline (optional)">
+                <mat-icon matPrefix>schedule</mat-icon>
+                <mat-datepicker-toggle matSuffix [for]="duePicker"></mat-datepicker-toggle>
+                <mat-datepicker #duePicker></mat-datepicker>
+                <mat-hint>Optional: Set a deadline for this task</mat-hint>
+              </mat-form-field>
+            </div>
+
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="modern-field">
+                <mat-label>Estimated Hours</mat-label>
+                <input matInput type="number" formControlName="estimatedHours" 
+                       placeholder="0" min="0" step="0.5" max="999">
+                <mat-icon matPrefix>timer</mat-icon>
+                <mat-hint>Estimated time to complete (hours)</mat-hint>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Assignment Section -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <mat-icon>person</mat-icon>
+            </div>
+            <div class="section-title">
+              <h3>Task Assignment</h3>
+              <p>Assign this task to a team member</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="modern-field">
+                <mat-label>Assign To</mat-label>
+                <mat-select formControlName="assignedTo" placeholder="Select team member">
+                  <mat-option value="">Unassigned</mat-option>
+                  <mat-option *ngFor="let member of teamMembers" [value]="member._id">
+                    {{ member.name }}
+                  </mat-option>
+                </mat-select>
+                <mat-icon matPrefix>person_add</mat-icon>
+                <mat-hint>Optional: Leave unassigned to assign later</mat-hint>
+              </mat-form-field>
+            </div>
+
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="modern-field">
+                <mat-label>Task Tags</mat-label>
+                <mat-select formControlName="tags" multiple placeholder="Add tags">
+                  <mat-option value="frontend">Frontend</mat-option>
+                  <mat-option value="backend">Backend</mat-option>
+                  <mat-option value="design">Design</mat-option>
+                  <mat-option value="testing">Testing</mat-option>
+                  <mat-option value="documentation">Documentation</mat-option>
+                  <mat-option value="bug">Bug Fix</mat-option>
+                </mat-select>
+                <mat-icon matPrefix>label</mat-icon>
+                <mat-hint>Optional: Categorize your task</mat-hint>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button mat-stroked-button type="button" class="cancel-btn" (click)="cancel()" [disabled]="isLoading">
+            <mat-icon>close</mat-icon>
+            Cancel
+          </button>
+          <button mat-flat-button color="primary" type="submit" class="submit-btn" 
+                  [disabled]="taskForm.invalid || isLoading">
+            <mat-icon *ngIf="!isLoading">add_task</mat-icon>
+            <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+            {{ isLoading ? 'Creating...' : 'Create Task' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

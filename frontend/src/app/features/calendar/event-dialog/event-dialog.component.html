@@ -1,0 +1,145 @@
+<div class="event-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>{{ getDialogTitle() }}</h2>
+    <button mat-icon-button mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="eventForm" (ngSubmit)="onSubmit()" class="event-form">
+    <div mat-dialog-content class="dialog-content">
+      <!-- Title -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Event Title</mat-label>
+        <input matInput formControlName="title" placeholder="Enter event title" required>
+        <mat-error *ngIf="eventForm.get('title')?.hasError('required')">
+          Title is required
+        </mat-error>
+        <mat-error *ngIf="eventForm.get('title')?.hasError('maxlength')">
+          Title must be less than 200 characters
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Description -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" 
+                  placeholder="Enter event description" 
+                  rows="3"></textarea>
+        <mat-error *ngIf="eventForm.get('description')?.hasError('maxlength')">
+          Description must be less than 1000 characters
+        </mat-error>
+      </mat-form-field>
+
+      <!-- All Day Toggle -->
+      <div class="checkbox-field">
+        <mat-checkbox formControlName="allDay" (change)="onAllDayChange()">
+          All day event
+        </mat-checkbox>
+      </div>
+
+      <!-- Date and Time Fields -->
+      <div class="date-time-row">
+        <div class="date-time-group">
+          <mat-form-field appearance="outline">
+            <mat-label>Start Date</mat-label>
+            <input matInput [matDatepicker]="startPicker" formControlName="startDate" required>
+            <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" *ngIf="!eventForm.get('allDay')?.value">
+            <mat-label>Start Time</mat-label>
+            <input matInput type="time" formControlName="startTime" required>
+          </mat-form-field>
+        </div>
+
+        <div class="date-time-group">
+          <mat-form-field appearance="outline">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="endPicker" formControlName="endDate" required>
+            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" *ngIf="!eventForm.get('allDay')?.value">
+            <mat-label>End Time</mat-label>
+            <input matInput type="time" formControlName="endTime" required>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Project Selection -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Project (Optional)</mat-label>
+        <mat-select formControlName="project">
+          <mat-option value="">None</mat-option>
+          <mat-option *ngFor="let project of (projects$ | async)?.projects" [value]="project._id">
+            <div class="project-option">
+              <div class="project-color" [style.background-color]="project.color"></div>
+              {{ project.name }}
+            </div>
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Location -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Location</mat-label>
+        <input matInput formControlName="location" placeholder="Enter location">
+        <mat-icon matSuffix>location_on</mat-icon>
+        <mat-error *ngIf="eventForm.get('location')?.hasError('maxlength')">
+          Location must be less than 200 characters
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Color Selection -->
+      <div class="color-selection">
+        <label class="color-label">Event Color</label>
+        <div class="color-options">
+          <div class="color-option" 
+               *ngFor="let color of predefinedColors"
+               [class.selected]="eventForm.get('color')?.value === color.value"
+               [style.background-color]="color.value"
+               [title]="color.name"
+               (click)="eventForm.patchValue({ color: color.value })">
+          </div>
+        </div>
+      </div>
+
+      <!-- Privacy Setting -->
+      <div class="checkbox-field">
+        <mat-checkbox formControlName="isPrivate">
+          Private event
+        </mat-checkbox>
+        <div class="field-hint">Private events are only visible to you</div>
+      </div>
+    </div>
+
+    <div mat-dialog-actions class="dialog-actions">
+      <div class="left-actions">
+        <button mat-button 
+                type="button" 
+                color="warn" 
+                *ngIf="data.mode === 'edit'"
+                (click)="onDelete()" 
+                [disabled]="isLoading">
+          <mat-icon>delete</mat-icon>
+          Delete
+        </button>
+      </div>
+      <div class="right-actions">
+        <button mat-button type="button" (click)="onCancel()" [disabled]="isLoading">
+          Cancel
+        </button>
+        <button mat-raised-button 
+                color="primary" 
+                type="submit" 
+                [disabled]="eventForm.invalid || isLoading">
+          <mat-icon *ngIf="isLoading">hourglass_empty</mat-icon>
+          {{ getSubmitButtonText() }}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,115 @@
+<button 
+  mat-icon-button 
+  [matMenuTriggerFor]="notificationMenu"
+  [matBadge]="unreadCount"
+  [matBadgeHidden]="unreadCount === 0"
+  matBadgeColor="warn"
+  matTooltip="Notifications">
+  <mat-icon>notifications</mat-icon>
+</button>
+
+<mat-menu #notificationMenu="matMenu" class="notification-menu" [hasBackdrop]="true" [overlapTrigger]="false" xPosition="before" yPosition="below">
+  <div class="notification-header" (click)="$event.stopPropagation()">
+    <div class="header-content">
+      <h3>Notifications</h3>
+      <span class="unread-badge" *ngIf="unreadCount > 0">{{ unreadCount }} new</span>
+    </div>
+    <button 
+      mat-icon-button 
+      *ngIf="unreadCount > 0"
+      (click)="markAllAsRead()"
+      matTooltip="Mark all as read"
+      class="mark-all-btn">
+      <mat-icon>done_all</mat-icon>
+    </button>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <div class="notification-content" (click)="$event.stopPropagation()">
+    <div *ngIf="isLoading" class="loading-state">
+      <mat-spinner diameter="32"></mat-spinner>
+      <p>Loading notifications...</p>
+    </div>
+
+    <div *ngIf="!isLoading && notifications.length === 0" class="empty-state">
+      <mat-icon>notifications_none</mat-icon>
+      <p>No notifications</p>
+    </div>
+
+    <div *ngIf="!isLoading && notifications.length > 0" class="notification-list">
+      <div 
+        *ngFor="let notification of notifications" 
+        class="notification-item"
+        [ngClass]="{
+          'unread': !notification.isRead,
+          'invitation': notification.type === 'project_invitation'
+        }"
+        (click)="onNotificationClick(notification)">
+        
+        <div class="notification-avatar">
+          <div 
+            *ngIf="notification.sender" 
+            class="sender-avatar"
+            [style.background-color]="getAvatarColor(notification.sender.name)">
+            {{ notification.sender.name.charAt(0).toUpperCase() }}
+          </div>
+          <div *ngIf="!notification.sender" class="notification-icon">
+            <mat-icon>{{ getNotificationIcon(notification.type) }}</mat-icon>
+          </div>
+        </div>
+
+        <div class="notification-content-area">
+          <div class="notification-main">
+            <h4 class="notification-title">{{ notification.title }}</h4>
+            <p class="notification-message">{{ notification.message }}</p>
+            <span class="notification-time">{{ getTimeAgo(notification.createdAt) }}</span>
+          </div>
+
+          <!-- Project Invitation Actions -->
+          <div 
+            *ngIf="notification.type === 'project_invitation' && !notification.isRead" 
+            class="invitation-actions"
+            (click)="$event.stopPropagation()">
+            <button 
+              mat-flat-button 
+              color="primary"
+              (click)="acceptInvitation(notification, $event)"
+              class="accept-btn">
+              <mat-icon>check</mat-icon>
+              Accept
+            </button>
+            <button 
+              mat-stroked-button
+              (click)="declineInvitation(notification, $event)"
+              class="decline-btn">
+              <mat-icon>close</mat-icon>
+              Decline
+            </button>
+          </div>
+
+          <!-- Read status indicator -->
+          <div *ngIf="!notification.isRead" class="unread-indicator"></div>
+        </div>
+
+        <div class="notification-actions">
+          <button 
+            mat-icon-button 
+            (click)="deleteNotification(notification, $event)"
+            matTooltip="Delete notification"
+            class="delete-btn">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <mat-divider *ngIf="notifications.length > 0"></mat-divider>
+  
+  <div class="notification-footer" (click)="$event.stopPropagation()">
+    <button mat-button class="view-all-btn">
+      View All Notifications
+    </button>
+  </div>
+</mat-menu>

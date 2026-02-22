@@ -1,0 +1,75 @@
+<div class="calendar-container">
+  <!-- Calendar Header -->
+  <div class="calendar-header">
+    <div class="calendar-title">
+      <h1>{{ getCurrentMonthYear() }}</h1>
+      <div class="calendar-nav">
+        <button mat-icon-button (click)="navigateToPreviousMonth()" matTooltip="Previous month">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button mat-button (click)="navigateToToday()" class="today-btn">Today</button>
+        <button mat-icon-button (click)="navigateToNextMonth()" matTooltip="Next month">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="calendar-actions">
+      <button mat-raised-button color="primary" (click)="createEvent()">
+        <mat-icon>add</mat-icon>
+        New Event
+      </button>
+    </div>
+  </div>
+
+  <!-- Month View -->
+  <div class="calendar-content" *ngIf="currentView">
+    <!-- Week Days Header -->
+    <div class="calendar-weekdays">
+      <div class="weekday" *ngFor="let day of weekDays">{{ day }}</div>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="calendar-grid">
+      <div class="calendar-week" *ngFor="let week of currentView.weeks">
+        <div class="calendar-day" 
+             *ngFor="let day of week.days"
+             [class.other-month]="!day.isCurrentMonth"
+             [class.today]="day.isToday"
+             [class.selected]="isSelectedDay(day)"
+             (click)="onDayClick(day, $event)">
+          
+          <div class="day-header">
+            <span class="day-number">{{ day.date.getDate() }}</span>
+          </div>
+
+          <div class="day-events" *ngIf="day.events.length > 0" (click)="$event.stopPropagation()">
+            <div class="event-item" 
+                 *ngFor="let event of getDayEvents(day)"
+                 [style.background-color]="getEventColor(event)"
+                 (click)="viewEventDetails(event)"
+                 [matTooltip]="event.title + (event.allDay ? '' : ' at ' + formatEventTime(event))">
+              <mat-icon class="event-icon">{{ getEventTypeIcon(event) }}</mat-icon>
+              <span class="event-title">{{ event.title }}</span>
+              <span class="event-time" *ngIf="!event.allDay">{{ formatEventTime(event) }}</span>
+            </div>
+            
+            <div class="more-events" 
+                 *ngIf="hasMoreEvents(day)"
+                 (click)="viewAllEventsForDay(day)">
+              +{{ getMoreEventsCount(day) }} more
+            </div>
+          </div>
+
+          <div class="task-badge" 
+               *ngIf="day.taskCount > 0"
+               [matBadge]="day.taskCount"
+               matBadgeColor="accent"
+               matBadgeSize="small">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

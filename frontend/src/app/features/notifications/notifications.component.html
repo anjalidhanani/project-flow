@@ -1,0 +1,248 @@
+<div class="notifications-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>notifications</mat-icon>
+        Notifications
+      </h1>
+      <p class="page-subtitle">Stay updated with your project activities</p>
+    </div>
+    <div class="header-actions">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="markAllAsRead()"
+        [disabled]="unreadCount === 0"
+        class="mark-all-btn">
+        <mat-icon>done_all</mat-icon>
+        Mark All Read
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <mat-tab-group 
+    [(selectedIndex)]="selectedTab" 
+    (selectedTabChange)="onTabChange($event.index)"
+    class="notification-tabs">
+    
+    <!-- All Notifications Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>inbox</mat-icon>
+        All
+        <span class="tab-count" *ngIf="notifications.length > 0">({{ notifications.length }})</span>
+      </ng-template>
+      
+      <div class="tab-content">
+        <div *ngIf="isLoading" class="loading-state">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading notifications...</p>
+        </div>
+
+        <div *ngIf="!isLoading && notifications.length === 0" class="empty-state">
+          <mat-icon>notifications_none</mat-icon>
+          <h3>No notifications yet</h3>
+          <p>You'll see project updates, invitations, and other activities here.</p>
+        </div>
+
+        <div *ngIf="!isLoading && notifications.length > 0" class="notifications-list">
+          <div 
+            *ngFor="let notification of notifications; trackBy: trackByNotificationId" 
+            class="notification-card"
+            [ngClass]="{
+              'unread': !notification.isRead,
+              'invitation': notification.type === 'project_invitation'
+            }"
+            (click)="markAsRead(notification)">
+            
+            <div class="notification-avatar">
+              <div 
+                *ngIf="notification.sender" 
+                class="sender-avatar"
+                [style.background-color]="getAvatarColor(notification.sender.name)">
+                {{ notification.sender.name.charAt(0).toUpperCase() }}
+              </div>
+              <div *ngIf="!notification.sender" class="notification-icon">
+                <mat-icon>{{ getNotificationIcon(notification.type) }}</mat-icon>
+              </div>
+            </div>
+
+            <div class="notification-content">
+              <div class="notification-header">
+                <h4 class="notification-title">{{ notification.title }}</h4>
+                <span class="notification-time">{{ getTimeAgo(notification.createdAt) }}</span>
+              </div>
+              
+              <p class="notification-message">{{ notification.message }}</p>
+
+              <!-- Project Invitation Actions -->
+              <div 
+                *ngIf="notification.type === 'project_invitation' && isInvitationPending(notification)" 
+                class="invitation-actions"
+                (click)="$event.stopPropagation()">
+                <button 
+                  mat-flat-button 
+                  color="primary"
+                  (click)="acceptInvitation(notification)"
+                  class="accept-btn">
+                  <mat-icon>check</mat-icon>
+                  Accept
+                </button>
+                <button 
+                  mat-stroked-button
+                  (click)="declineInvitation(notification)"
+                  class="decline-btn">
+                  <mat-icon>close</mat-icon>
+                  Decline
+                </button>
+              </div>
+
+              <!-- Invitation Status Display -->
+              <div 
+                *ngIf="notification.type === 'project_invitation' && !isInvitationPending(notification)"
+                class="invitation-status">
+                <span class="status-badge" [ngClass]="getInvitationStatusClass(notification)">
+                  <mat-icon>{{ getInvitationStatusIcon(notification) }}</mat-icon>
+                  {{ getInvitationStatusText(notification) }}
+                </span>
+              </div>
+
+              <!-- Read status indicator -->
+              <div *ngIf="!notification.isRead" class="unread-indicator"></div>
+            </div>
+
+            <div class="notification-actions">
+              <button 
+                mat-icon-button 
+                [matMenuTriggerFor]="notificationMenu"
+                class="menu-btn"
+                (click)="$event.stopPropagation()">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              
+              <mat-menu #notificationMenu="matMenu">
+                <button mat-menu-item (click)="markAsRead(notification)" *ngIf="!notification.isRead">
+                  <mat-icon>mark_email_read</mat-icon>
+                  Mark as Read
+                </button>
+                <button mat-menu-item (click)="deleteNotification(notification)" class="delete-action">
+                  <mat-icon>delete</mat-icon>
+                  Delete
+                </button>
+              </mat-menu>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Unread Notifications Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>mark_email_unread</mat-icon>
+        Unread
+        <span class="tab-count" *ngIf="unreadCount > 0" [matBadge]="unreadCount" matBadgeColor="warn" matBadgeSize="small"></span>
+      </ng-template>
+      
+      <div class="tab-content">
+        <div *ngIf="isLoading" class="loading-state">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading unread notifications...</p>
+        </div>
+
+        <div *ngIf="!isLoading && unreadNotifications.length === 0" class="empty-state">
+          <mat-icon>mark_email_read</mat-icon>
+          <h3>All caught up!</h3>
+          <p>You have no unread notifications.</p>
+        </div>
+
+        <div *ngIf="!isLoading && unreadNotifications.length > 0" class="notifications-list">
+          <div 
+            *ngFor="let notification of unreadNotifications; trackBy: trackByNotificationId" 
+            class="notification-card unread"
+            [ngClass]="{'invitation': notification.type === 'project_invitation'}"
+            (click)="markAsRead(notification)">
+            
+            <div class="notification-avatar">
+              <div 
+                *ngIf="notification.sender" 
+                class="sender-avatar"
+                [style.background-color]="getAvatarColor(notification.sender.name)">
+                {{ notification.sender.name.charAt(0).toUpperCase() }}
+              </div>
+              <div *ngIf="!notification.sender" class="notification-icon">
+                <mat-icon>{{ getNotificationIcon(notification.type) }}</mat-icon>
+              </div>
+            </div>
+
+            <div class="notification-content">
+              <div class="notification-header">
+                <h4 class="notification-title">{{ notification.title }}</h4>
+                <span class="notification-time">{{ getTimeAgo(notification.createdAt) }}</span>
+              </div>
+              
+              <p class="notification-message">{{ notification.message }}</p>
+
+              <!-- Project Invitation Actions -->
+              <div 
+                *ngIf="notification.type === 'project_invitation' && isInvitationPending(notification)" 
+                class="invitation-actions"
+                (click)="$event.stopPropagation()">
+                <button 
+                  mat-flat-button 
+                  color="primary"
+                  (click)="acceptInvitation(notification)"
+                  class="accept-btn">
+                  <mat-icon>check</mat-icon>
+                  Accept
+                </button>
+                <button 
+                  mat-stroked-button
+                  (click)="declineInvitation(notification)"
+                  class="decline-btn">
+                  <mat-icon>close</mat-icon>
+                  Decline
+                </button>
+              </div>
+
+              <!-- Invitation Status Display -->
+              <div 
+                *ngIf="notification.type === 'project_invitation' && !isInvitationPending(notification)"
+                class="invitation-status">
+                <span class="status-badge" [ngClass]="getInvitationStatusClass(notification)">
+                  <mat-icon>{{ getInvitationStatusIcon(notification) }}</mat-icon>
+                  {{ getInvitationStatusText(notification) }}
+                </span>
+              </div>
+
+              <div class="unread-indicator"></div>
+            </div>
+
+            <div class="notification-actions">
+              <button 
+                mat-icon-button 
+                [matMenuTriggerFor]="unreadNotificationMenu"
+                class="menu-btn"
+                (click)="$event.stopPropagation()">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              
+              <mat-menu #unreadNotificationMenu="matMenu">
+                <button mat-menu-item (click)="markAsRead(notification)">
+                  <mat-icon>mark_email_read</mat-icon>
+                  Mark as Read
+                </button>
+                <button mat-menu-item (click)="deleteNotification(notification)" class="delete-action">
+                  <mat-icon>delete</mat-icon>
+                  Delete
+                </button>
+              </mat-menu>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

@@ -1,0 +1,172 @@
+<div class="modern-nav-container">
+  <!-- Modern Sidebar -->
+  <aside class="sidebar" [class.collapsed]="isCollapsed">
+    <!-- Logo Section -->
+    <div class="logo-section">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <mat-icon>rocket_launch</mat-icon>
+        </div>
+        <div class="logo-text" *ngIf="!isCollapsed">
+          <h2 class="logo-title">ProjectFlow</h2>
+          <p class="logo-subtitle">Manage & Collaborate</p>
+        </div>
+      </div>
+      <button class="collapse-btn" mat-icon-button (click)="toggleSidebar()">
+        <mat-icon>{{ isCollapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+      </button>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="nav-menu">
+      <div class="nav-section">
+        <h3 class="nav-section-title" *ngIf="!isCollapsed">Main</h3>
+        
+        <a class="nav-item" 
+           routerLink="/dashboard" 
+           routerLinkActive="active"
+           [matTooltip]="isCollapsed ? 'Dashboard' : ''"
+           matTooltipPosition="right">
+          <div class="nav-item-icon">
+            <mat-icon>dashboard</mat-icon>
+          </div>
+          <span class="nav-item-text" *ngIf="!isCollapsed">Dashboard</span>
+          <div class="nav-item-indicator"></div>
+        </a>
+
+        <a class="nav-item" 
+           routerLink="/projects" 
+           routerLinkActive="active"
+           [matTooltip]="isCollapsed ? 'Projects' : ''"
+           matTooltipPosition="right">
+          <div class="nav-item-icon">
+            <mat-icon>folder_open</mat-icon>
+          </div>
+          <span class="nav-item-text" *ngIf="!isCollapsed">Projects</span>
+          <div class="nav-item-indicator"></div>
+        </a>
+
+        <a class="nav-item" 
+           routerLink="/tasks" 
+           routerLinkActive="active"
+           [matTooltip]="isCollapsed ? 'My Tasks' : ''"
+           matTooltipPosition="right">
+          <div class="nav-item-icon">
+            <mat-icon>assignment</mat-icon>
+          </div>
+          <span class="nav-item-text" *ngIf="!isCollapsed">My Tasks</span>
+          <div class="nav-item-indicator"></div>
+        </a>
+
+      </div>
+
+      <div class="nav-section">
+        <h3 class="nav-section-title" *ngIf="!isCollapsed">Workspace</h3>
+        
+        <a class="nav-item" 
+           routerLink="/calendar" 
+           routerLinkActive="active"
+           [matTooltip]="isCollapsed ? 'Calendar' : ''"
+           matTooltipPosition="right">
+          <div class="nav-item-icon">
+            <mat-icon>calendar_today</mat-icon>
+          </div>
+          <span class="nav-item-text" *ngIf="!isCollapsed">Calendar</span>
+          <div class="nav-item-indicator"></div>
+        </a>
+
+        <a class="nav-item" 
+           routerLink="/reports" 
+           routerLinkActive="active"
+           [matTooltip]="isCollapsed ? 'Reports' : ''"
+           matTooltipPosition="right">
+          <div class="nav-item-icon">
+            <mat-icon>analytics</mat-icon>
+          </div>
+          <span class="nav-item-text" *ngIf="!isCollapsed">Reports</span>
+          <div class="nav-item-indicator"></div>
+        </a>
+
+        <a class="nav-item" 
+           routerLink="/team" 
+           routerLinkActive="active"
+           [matTooltip]="isCollapsed ? 'Team' : ''"
+           matTooltipPosition="right">
+          <div class="nav-item-icon">
+            <mat-icon>groups</mat-icon>
+          </div>
+          <span class="nav-item-text" *ngIf="!isCollapsed">Team</span>
+          <div class="nav-item-indicator"></div>
+        </a>
+
+        <!-- Notifications as Navigation Item -->
+        <a class="nav-item notification-nav-item" 
+           routerLink="/notifications"
+           routerLinkActive="active"
+           [matTooltip]="isCollapsed ? 'Notifications' : ''"
+           matTooltipPosition="right">
+          <div class="nav-item-icon">
+            <app-notification-panel></app-notification-panel>
+          </div>
+          <span class="nav-item-text" *ngIf="!isCollapsed">Notifications</span>
+          <div class="nav-item-indicator"></div>
+        </a>
+      </div>
+    </nav>
+
+    <!-- User Profile Section -->
+    <div class="user-section" *ngIf="currentUser$ | async as user">
+      
+      <div class="user-profile" [matMenuTriggerFor]="userMenu">
+        <div class="user-avatar" [style.background-color]="getAvatarColor(user.name)">
+          {{ user.name.charAt(0).toUpperCase() }}
+        </div>
+        <div class="user-info" *ngIf="!isCollapsed">
+          <h4 class="user-name">{{ user.name }}</h4>
+          <p class="user-email">{{ user.email }}</p>
+        </div>
+        <mat-icon class="user-menu-icon" *ngIf="!isCollapsed">expand_more</mat-icon>
+      </div>
+
+      <mat-menu #userMenu="matMenu" class="user-dropdown" xPosition="before" yPosition="below">
+        <div class="user-menu-header" (click)="$event.stopPropagation()">
+          <div class="user-avatar-large" [style.background-color]="getAvatarColor(user.name)">
+            {{ user.name.charAt(0).toUpperCase() }}
+          </div>
+          <div class="user-details">
+            <h4>{{ user.name }}</h4>
+            <p>{{ user.email }}</p>
+          </div>
+        </div>
+        <mat-divider></mat-divider>
+        <button mat-menu-item routerLink="/profile" class="profile-item">
+          <mat-icon>person</mat-icon>
+          <span>Profile Settings</span>
+        </button>
+        <button mat-menu-item routerLink="/help" class="help-item">
+          <mat-icon>help</mat-icon>
+          <span>Help & Support</span>
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()" class="logout-item">
+          <mat-icon>logout</mat-icon>
+          <span>Sign Out</span>
+        </button>
+      </mat-menu>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content" [class.expanded]="isCollapsed">
+
+    <!-- Page Content -->
+    <div class="page-content">
+      <ng-content></ng-content>
+    </div>
+  </main>
+
+  <!-- Mobile Overlay -->
+  <div class="mobile-overlay" 
+       [class.active]="isMobileMenuOpen" 
+       (click)="closeMobileMenu()"></div>
+</div>

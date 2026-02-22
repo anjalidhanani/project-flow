@@ -1,0 +1,326 @@
+.profile-container {
+  padding: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.profile-header {
+  margin-bottom: 32px;
+  text-align: center;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 0 0 8px 0;
+    font-size: 2rem;
+    font-weight: 500;
+    color: #1976d2;
+
+    mat-icon {
+      font-size: 2rem;
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+
+  .profile-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    margin: 0;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 16px;
+
+  p {
+    color: #666;
+    font-size: 1.1rem;
+  }
+}
+
+.profile-content {
+  .profile-tabs {
+    ::ng-deep .mat-mdc-tab-group {
+      .mat-mdc-tab-header {
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .mat-mdc-tab-labels {
+        justify-content: center;
+      }
+
+      .mat-mdc-tab-label {
+        min-width: 120px;
+        padding: 0 24px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.tab-content {
+  padding: 24px 0;
+}
+
+.profile-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+
+  mat-card-header {
+    padding: 24px 24px 16px 24px;
+
+    mat-card-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    mat-card-subtitle {
+      font-size: 1rem;
+      opacity: 0.7;
+    }
+  }
+
+  mat-card-content {
+    padding: 0 24px 24px 24px;
+  }
+}
+
+.profile-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 32px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 12px;
+
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .avatar-info {
+    flex: 1;
+
+    h3 {
+      margin: 0 0 4px 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    p {
+      margin: 0 0 2px 0;
+      color: #666;
+      font-size: 1rem;
+
+      &.member-since {
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
+.profile-form {
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    .full-width {
+      flex: 1;
+    }
+
+    .half-width {
+      flex: 0.5;
+    }
+
+    mat-form-field {
+      &.full-width {
+        width: 100%;
+      }
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #e0e0e0;
+
+    button {
+      min-width: 140px;
+      height: 44px;
+      border-radius: 8px;
+      font-weight: 500;
+
+      mat-icon {
+        margin-right: 8px;
+      }
+    }
+  }
+}
+
+.preference-section {
+  margin: 24px 0;
+
+  h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0 0 16px 0;
+    color: #333;
+  }
+
+  .form-row {
+    margin-bottom: 16px;
+  }
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .toggle-info {
+    flex: 1;
+
+    .toggle-label {
+      display: block;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .toggle-description {
+      display: block;
+      font-size: 0.9rem;
+      color: #666;
+    }
+  }
+
+  mat-slide-toggle {
+    margin-left: 16px;
+  }
+}
+
+// Material form field customizations
+::ng-deep {
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      border-radius: 8px;
+    }
+
+    &.mat-form-field-appearance-outline {
+      .mat-mdc-form-field-outline {
+        border-radius: 8px;
+      }
+    }
+
+    .mat-mdc-form-field-icon-suffix {
+      color: #666;
+    }
+  }
+
+  .mat-mdc-tab-group {
+    .mat-mdc-tab-body-content {
+      overflow: visible;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 16px;
+  }
+
+  .profile-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .profile-avatar-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+
+    .profile-avatar {
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
+    }
+  }
+
+  .profile-form {
+    .form-row {
+      flex-direction: column;
+      gap: 8px;
+
+      .half-width {
+        flex: 1;
+      }
+    }
+
+    .form-actions {
+      justify-content: center;
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+
+  .toggle-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    mat-slide-toggle {
+      margin-left: 0;
+      align-self: flex-end;
+    }
+  }
+
+  ::ng-deep .mat-mdc-tab-labels {
+    justify-content: flex-start !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 12px;
+  }
+
+  .profile-card {
+    mat-card-header,
+    mat-card-content {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+  }
+}

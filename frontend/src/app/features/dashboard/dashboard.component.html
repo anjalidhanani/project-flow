@@ -1,0 +1,176 @@
+<div class="modern-dashboard">
+  <!-- Welcome Header -->
+  <header class="dashboard-header">
+    <div class="welcome-section">
+      <div class="welcome-content">
+        <h1 class="welcome-title">
+          Good {{ getTimeOfDay() }}, 
+          <span class="user-name">{{ (currentUser$ | async)?.name || 'there' }}</span>! 👋
+        </h1>
+        <p class="welcome-subtitle">Here's what's happening with your projects today</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats Overview -->
+  <section class="stats-overview">
+    <div class="stats-grid stats-grid-fixed" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 24px; max-width: 1200px; margin: 0 auto;">
+      <!-- Total Projects Card -->
+      <div class="stat-card projects-card">
+        <div class="stat-header">
+          <div class="stat-icon projects">
+            <mat-icon>folder</mat-icon>
+          </div>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{ stats?.totalProjects || 0 }}</h3>
+          <p class="stat-label">Total Projects</p>
+          <div class="stat-progress">
+            <div class="progress-bar">
+              <div class="progress-fill projects" [style.width.%]="getProjectsProgress()"></div>
+            </div>
+            <span class="progress-text">{{ stats?.activeProjects || 0 }} active</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tasks Card -->
+      <div class="stat-card tasks-card">
+        <div class="stat-header">
+          <div class="stat-icon tasks">
+            <mat-icon>checklist</mat-icon>
+          </div>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{ stats?.totalAssignedTasks || 0 }}</h3>
+          <p class="stat-label">Assigned Tasks</p>
+          <div class="stat-progress">
+            <div class="progress-bar">
+              <div class="progress-fill tasks" [style.width.%]="getCompletionRate()"></div>
+            </div>
+            <span class="progress-text">{{ stats?.completedTasks || 0 }} completed</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Completion Rate Card -->
+      <div class="stat-card completion-card">
+        <div class="stat-header">
+          <div class="stat-icon completion">
+            <mat-icon>pie_chart</mat-icon>
+          </div>
+          <div class="completion-circle">
+            <svg viewBox="0 0 36 36" class="circular-chart">
+              <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              <path class="circle" [attr.stroke-dasharray]="getCompletionRate() + ', 100'" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            </svg>
+            <div class="circle-text">{{ getCompletionRate() }}%</div>
+          </div>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{ getCompletionRate() }}%</h3>
+          <p class="stat-label">Completion Rate</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Main Content Grid -->
+  <div class="dashboard-grid">
+    <!-- Recent Projects -->
+    <section class="dashboard-card recent-projects">
+      <div class="card-header">
+        <h2 class="card-title">Recent Projects</h2>
+        <button class="view-all-btn" mat-button (click)="viewProjects()">
+          View All
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+      
+      <div class="card-content" *ngIf="!isLoading; else loadingTemplate">
+        <div class="project-list" *ngIf="recentProjects.length > 0; else emptyProjects">
+          <div class="project-item" 
+               *ngFor="let project of recentProjects" 
+               (click)="viewProject(project._id)">
+            <div class="project-indicator" [style.background-color]="project.color || '#667eea'"></div>
+            <div class="project-info">
+              <h4 class="project-name">{{ project.name }}</h4>
+              <p class="project-description">{{ project.description }}</p>
+              <div class="project-meta">
+                <span class="project-status" [ngClass]="'status-' + project.status">
+                  {{ project.status | titlecase }}
+                </span>
+                <span class="project-progress">{{ project.progress || 0 }}% complete</span>
+              </div>
+            </div>
+            <div class="project-actions">
+              <div class="progress-ring">
+                <svg class="progress-ring-svg" width="40" height="40">
+                  <circle class="progress-ring-circle-bg" cx="20" cy="20" r="16"/>
+                  <circle class="progress-ring-circle" 
+                          cx="20" cy="20" r="16"
+                          [attr.stroke-dasharray]="getCircumference()"
+                          [attr.stroke-dashoffset]="getStrokeDashoffset(project.progress || 0)"/>
+                </svg>
+                <span class="progress-text">{{ project.progress || 0 }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #emptyProjects>
+          <div class="empty-state">
+            <div class="empty-icon">
+              <mat-icon>folder_open</mat-icon>
+            </div>
+            <h3>No projects yet</h3>
+            <p>Create your first project to get started</p>
+            <button mat-flat-button color="primary" routerLink="/projects/create">
+              <mat-icon>add</mat-icon>
+              Create Project
+            </button>
+          </div>
+        </ng-template>
+      </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="dashboard-card quick-actions">
+      <div class="card-header">
+        <h2 class="card-title">Quick Actions</h2>
+      </div>
+      
+      <div class="card-content">
+        <div class="actions-container">
+          <div class="action-card primary" (click)="createProject()">
+            <div class="action-card-content">
+              <mat-icon class="action-card-icon">add_circle</mat-icon>
+              <h3>New Project</h3>
+              <p>Start a new project</p>
+            </div>
+          </div>
+
+          <div class="action-card secondary" (click)="createTask()">
+            <div class="action-card-content">
+              <mat-icon class="action-card-icon">task</mat-icon>
+              <h3>Add Task</h3>
+              <p>Create a new task</p>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Loading Template -->
+  <ng-template #loadingTemplate>
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading dashboard...</p>
+    </div>
+  </ng-template>
+</div>

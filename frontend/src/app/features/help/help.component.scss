@@ -1,0 +1,485 @@
+.help-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.help-header {
+  text-align: center;
+  margin-bottom: 32px;
+
+  h1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 0 0 16px 0;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #1976d2;
+
+    mat-icon {
+      font-size: 2.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+  }
+
+  .help-subtitle {
+    font-size: 1.2rem;
+    color: #666;
+    margin: 0;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+}
+
+.help-content {
+  .help-tabs {
+    ::ng-deep .mat-mdc-tab-group {
+      .mat-mdc-tab-header {
+        border-bottom: 2px solid #e0e0e0;
+        margin-bottom: 24px;
+      }
+
+      .mat-mdc-tab-labels {
+        justify-content: center;
+      }
+
+      .mat-mdc-tab-label {
+        min-width: 140px;
+        padding: 0 24px;
+        font-weight: 500;
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+.tab-content {
+  padding: 0;
+}
+
+.help-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+
+  mat-card-header {
+    padding: 24px 24px 16px 24px;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+
+      mat-icon {
+        color: #1976d2;
+        font-size: 1.8rem;
+        width: 1.8rem;
+        height: 1.8rem;
+      }
+    }
+
+    mat-card-subtitle {
+      font-size: 1.1rem;
+      opacity: 0.7;
+      margin-left: 42px;
+    }
+  }
+
+  mat-card-content {
+    padding: 0 24px 24px 24px;
+  }
+}
+
+// Getting Started Styles
+.getting-started-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.step-card {
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: #1976d2;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(25, 118, 210, 0.15);
+  }
+
+  .step-number {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #1976d2;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 auto 16px auto;
+  }
+
+  h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+    color: #333;
+  }
+
+  p {
+    color: #666;
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+  }
+
+  mat-chip-set {
+    justify-content: center;
+  }
+}
+
+// FAQ Styles
+.faq-accordion {
+  .mat-expansion-panel {
+    border-radius: 8px !important;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    &:not(.mat-expanded) {
+      border-radius: 8px !important;
+    }
+
+    .mat-expansion-panel-header {
+      padding: 16px 24px;
+      
+      .mat-panel-title {
+        font-weight: 500;
+        color: #333;
+      }
+    }
+
+    .mat-expansion-panel-content {
+      .mat-expansion-panel-body {
+        padding: 0 24px 16px 24px;
+        color: #666;
+        line-height: 1.6;
+
+        ol, ul {
+          margin: 12px 0;
+          padding-left: 24px;
+
+          li {
+            margin-bottom: 8px;
+          }
+        }
+
+        strong {
+          color: #333;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+// User Guide Styles
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.guide-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  mat-card-header {
+    padding: 20px 20px 12px 20px;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #333;
+
+      mat-icon {
+        color: #1976d2;
+        font-size: 1.4rem;
+        width: 1.4rem;
+        height: 1.4rem;
+      }
+    }
+  }
+
+  mat-card-content {
+    padding: 0 20px 20px 20px;
+
+    p {
+      color: #666;
+      line-height: 1.6;
+      margin: 0 0 16px 0;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #666;
+
+      li {
+        margin-bottom: 8px;
+        line-height: 1.5;
+      }
+    }
+  }
+}
+
+// Contact Support Styles
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.contact-method {
+  text-align: center;
+  padding: 28px 24px;
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+  border-radius: 16px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  &:hover {
+    border-color: #1976d2;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(25, 118, 210, 0.15);
+  }
+
+  .contact-icon {
+    font-size: 3.5rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    color: #1976d2;
+    margin: 0 auto 20px auto;
+    display: block;
+  }
+
+  h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0 0 16px 0;
+    color: #333;
+  }
+
+  p {
+    color: #666;
+    line-height: 1.6;
+    margin: 0 0 24px 0;
+    flex-grow: 1;
+    font-size: 0.95rem;
+  }
+
+  button {
+    min-width: 200px;
+    height: 48px;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-transform: none;
+    letter-spacing: 0.5px;
+
+    mat-icon {
+      margin-right: 8px;
+      font-size: 1.2rem;
+    }
+  }
+}
+
+.support-hours {
+  text-align: center;
+  margin-top: 40px;
+
+  h3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 24px 0;
+
+    mat-icon {
+      color: #1976d2;
+      font-size: 1.5rem;
+    }
+  }
+
+  .hours-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .hours-item {
+    background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: #1976d2;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(25, 118, 210, 0.1);
+    }
+
+    strong {
+      color: #333;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    span {
+      color: #666;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+  }
+}
+
+// Material customizations
+::ng-deep {
+  .mat-mdc-chip-set {
+    justify-content: center;
+    
+    .mat-mdc-chip {
+      background-color: rgba(25, 118, 210, 0.1);
+      color: #1976d2;
+      font-weight: 500;
+    }
+  }
+
+  .mat-mdc-tab-group {
+    .mat-mdc-tab-body-content {
+      overflow: visible;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .help-container {
+    padding: 16px;
+  }
+
+  .help-header {
+    h1 {
+      font-size: 2rem;
+      
+      mat-icon {
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+
+    .help-subtitle {
+      font-size: 1rem;
+    }
+  }
+
+  .getting-started-grid,
+  .guide-grid,
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .step-card,
+  .contact-method {
+    padding: 20px;
+  }
+
+  .help-card {
+    mat-card-header,
+    mat-card-content {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    mat-card-header mat-card-subtitle {
+      margin-left: 0;
+    }
+  }
+
+  .faq-accordion .mat-expansion-panel {
+    .mat-expansion-panel-header {
+      padding: 12px 16px;
+    }
+
+    .mat-expansion-panel-content .mat-expansion-panel-body {
+      padding: 0 16px 12px 16px;
+    }
+  }
+
+  ::ng-deep .mat-mdc-tab-labels {
+    justify-content: flex-start !important;
+  }
+
+  ::ng-deep .mat-mdc-tab-label {
+    min-width: 100px !important;
+    padding: 0 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .help-container {
+    padding: 12px;
+  }
+
+  .help-header h1 {
+    font-size: 1.8rem;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .contact-method button {
+    min-width: 140px;
+    font-size: 0.9rem;
+  }
+
+  .hours-grid {
+    grid-template-columns: 1fr;
+  }
+}

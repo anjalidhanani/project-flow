@@ -1,0 +1,115 @@
+<div class="invite-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>Invite Team Members</h2>
+    <p class="dialog-subtitle">Send invitations to join "{{ data.projectName }}"</p>
+  </div>
+
+  <form [formGroup]="inviteForm" (ngSubmit)="onSubmit()" class="invite-form">
+    <div class="form-content">
+      <!-- Email Input with Autocomplete -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Search by email or name</mat-label>
+        <input 
+          matInput 
+          formControlName="email"
+          [matAutocomplete]="userAutocomplete"
+          placeholder="Enter email address or search for users">
+        <mat-icon matSuffix>search</mat-icon>
+        <mat-autocomplete 
+          #userAutocomplete="matAutocomplete" 
+          [displayWith]="displayUser"
+          (optionSelected)="onUserSelected($event.option.value)">
+          <mat-option *ngFor="let user of filteredUsers | async" [value]="user">
+            <div class="user-option">
+              <div class="user-avatar" [style.background-color]="getAvatarColor(user.name || 'Unknown')">
+                {{ (user.name || 'U').charAt(0).toUpperCase() }}
+              </div>
+              <div class="user-info">
+                <div class="user-name">{{ user.name || 'Unknown User' }}</div>
+                <div class="user-email">{{ user.email || 'No email provided' }}</div>
+              </div>
+            </div>
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error *ngIf="inviteForm.get('email')?.hasError('email')">
+          Please enter a valid email address
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Add Email Button -->
+      <button 
+        type="button" 
+        mat-stroked-button 
+        (click)="addUserByEmail()"
+        [disabled]="!inviteForm.get('email')?.valid || !inviteForm.get('email')?.value"
+        class="add-email-btn">
+        <mat-icon>add</mat-icon>
+        Add Email
+      </button>
+
+      <!-- Selected Users Chips -->
+      <div class="selected-users" *ngIf="selectedUsers.length > 0">
+        <h4>Selected Members ({{ selectedUsers.length }})</h4>
+        <div class="user-chips">
+          <mat-chip-set>
+            <mat-chip 
+              *ngFor="let user of selectedUsers" 
+              (removed)="removeUser(user)"
+              [removable]="true">
+              <div class="chip-content">
+                <div class="chip-avatar" [style.background-color]="getAvatarColor(user.name || 'Unknown')">
+                  {{ (user.name || 'U').charAt(0).toUpperCase() }}
+                </div>
+                <span class="chip-name">{{ user.name || 'Unknown User' }}</span>
+                <span class="chip-email">({{ user.email || 'No email' }})</span>
+              </div>
+              <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+      </div>
+
+      <!-- Role Selection -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Role</mat-label>
+        <mat-select formControlName="role">
+          <mat-option *ngFor="let role of roles" [value]="role.value">
+            {{ role.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="inviteForm.get('role')?.hasError('required')">
+          Role is required
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Info Message -->
+      <div class="info-message">
+        <mat-icon>info</mat-icon>
+        <span>Invited members will receive in-app notifications when they log in and can accept to join the project.</span>
+      </div>
+    </div>
+
+    <!-- Dialog Actions -->
+    <div class="dialog-actions" mat-dialog-actions>
+      <button 
+        type="button" 
+        mat-stroked-button 
+        (click)="onCancel()"
+        [disabled]="isLoading">
+        Cancel
+      </button>
+      <button 
+        type="submit" 
+        mat-flat-button 
+        color="primary"
+        [disabled]="isLoading || selectedUsers.length === 0">
+        <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+        <mat-icon *ngIf="!isLoading">send</mat-icon>
+        <span *ngIf="!isLoading">
+          Send Invitation{{ selectedUsers.length > 1 || (selectedUsers.length === 0 && inviteForm.get('email')?.value) ? 's' : '' }}
+        </span>
+        <span *ngIf="isLoading">Sending...</span>
+      </button>
+    </div>
+  </form>
+</div>

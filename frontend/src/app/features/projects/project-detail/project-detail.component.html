@@ -1,0 +1,433 @@
+<div class="project-detail-container" *ngIf="!isLoading && project">
+  <!-- Header Section -->
+  <header class="project-header">
+    <div class="header-content">
+      <div class="breadcrumb">
+        <button mat-icon-button (click)="goBack()" class="back-btn">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <span class="breadcrumb-path">Projects / {{ project.name }}</span>
+      </div>
+
+      <div class="project-title-section">
+        <div class="title-row">
+          <h1 class="project-title">{{ project.name }}</h1>
+          <div class="project-badges">
+            <mat-chip class="status-chip" [ngClass]="'status-' + project.status">
+              {{ project.status | titlecase }}
+            </mat-chip>
+            <mat-chip class="priority-chip" [ngClass]="'priority-' + project.priority">
+              {{ project.priority | titlecase }}
+            </mat-chip>
+          </div>
+        </div>
+        
+        <p class="project-description">{{ project.description }}</p>
+        
+        <div class="project-meta">
+          <div class="meta-item">
+            <mat-icon>schedule</mat-icon>
+            <span>{{ project.startDate | date:'MMM d' }} - {{ project.endDate | date:'MMM d, y' }}</span>
+          </div>
+          <div class="meta-item">
+            <mat-icon>group</mat-icon>
+            <span>{{ members.length }} members</span>
+          </div>
+          <div class="meta-item" *ngIf="project.budget">
+            <mat-icon>account_balance_wallet</mat-icon>
+            <span>${{ project.budget | number:'1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button mat-stroked-button (click)="editProject()" *ngIf="canEditProject()">
+          <mat-icon>edit</mat-icon>
+          Edit
+        </button>
+        <button mat-flat-button color="primary" (click)="createTask()">
+          <mat-icon>add</mat-icon>
+          New Task
+        </button>
+        <button mat-icon-button [matMenuTriggerFor]="projectMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #projectMenu="matMenu">
+          <button mat-menu-item (click)="inviteMembers()" *ngIf="canManageMembers()">
+            <mat-icon>person_add</mat-icon>
+            Invite Members
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item class="danger-item" (click)="deleteProject()" *ngIf="canDeleteProject()">
+            <mat-icon>delete</mat-icon>
+            Delete Project
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats Section -->
+  <section class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon todo">
+          <mat-icon>assignment</mat-icon>
+        </div>
+        <div class="stat-content">
+          <h3>{{ tasks.length }}</h3>
+          <p>Total Tasks</p>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="getProgressPercentage()"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon completed">
+          <mat-icon>task_alt</mat-icon>
+        </div>
+        <div class="stat-content">
+          <h3>{{ getTasksByStatus('completed').length }}</h3>
+          <p>Completed</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon progress">
+          <mat-icon>trending_up</mat-icon>
+        </div>
+        <div class="stat-content">
+          <h3>{{ getProgressPercentage() }}%</h3>
+          <p>Progress</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon team">
+          <mat-icon>group</mat-icon>
+        </div>
+        <div class="stat-content">
+          <h3>{{ members.length }}</h3>
+          <p>Team Members</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <mat-tab-group class="content-tabs" animationDuration="200ms">
+      <!-- Tasks Tab -->
+      <mat-tab label="Tasks">
+        <div class="tab-content">
+          <div class="section-header">
+            <h2>Task Board</h2>
+            <div class="view-controls">
+              <button mat-stroked-button 
+                      class="view-btn" 
+                      [ngClass]="{active: currentView === 'kanban'}"
+                      (click)="setView('kanban')">
+                <mat-icon>view_kanban</mat-icon>
+                Kanban
+              </button>
+              <button mat-stroked-button 
+                      class="view-btn" 
+                      [ngClass]="{active: currentView === 'list'}"
+                      (click)="setView('list')">
+                <mat-icon>view_list</mat-icon>
+                List
+              </button>
+            </div>
+          </div>
+
+          <!-- Kanban View -->
+          <div class="kanban-board" *ngIf="currentView === 'kanban'">
+            <div class="kanban-column" *ngFor="let status of taskStatuses">
+              <div class="column-header">
+                <div class="column-title">
+                  <div class="status-indicator" [ngClass]="'status-' + status.value"></div>
+                  <h3>{{ status.label }}</h3>
+                  <span class="task-count-badge">{{ getTasksByStatus(status.value).length }}</span>
+                </div>
+                <button mat-icon-button [matMenuTriggerFor]="columnMenu">
+                  <mat-icon>more_horiz</mat-icon>
+                </button>
+                <mat-menu #columnMenu="matMenu">
+                  <button mat-menu-item (click)="createTask(status.value)">
+                    <mat-icon>add</mat-icon>
+                    Add Task
+                  </button>
+                </mat-menu>
+              </div>
+
+              <div class="task-list">
+                <div class="task-card" 
+                     *ngFor="let task of getTasksByStatus(status.value)" 
+                     (click)="viewTask(task._id)">
+                  <div class="task-header">
+                    <h4 class="task-title">{{ task.title }}</h4>
+                    <button mat-icon-button (click)="$event.stopPropagation(); editTask(task)" style="width: 24px; height: 24px; min-width: 24px; flex-shrink: 0; padding: 0; display: flex; align-items: center; justify-content: center;">
+                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">edit</mat-icon>
+                    </button>
+                  </div>
+                  
+                  <p class="task-description" *ngIf="task.description">
+                    {{ task.description }}
+                  </p>
+                  
+                  <div class="task-tags" *ngIf="task.tags?.length">
+                    <span class="tag" *ngFor="let tag of task.tags?.slice(0, 3)">{{ tag }}</span>
+                    <span class="tag more" *ngIf="task.tags && task.tags.length > 3">+{{ task.tags.length - 3 }}</span>
+                  </div>
+
+                  <div class="task-footer">
+                    <div class="task-meta">
+                      <div class="priority-badge" [ngClass]="'priority-' + (task.priority || 'medium')" *ngIf="task.priority">
+                        <mat-icon>{{ getPriorityIcon(task.priority) }}</mat-icon>
+                      </div>
+                      <div class="assignee-avatar" 
+                           *ngIf="task.assignedTo"
+                           [style.background-color]="getAvatarColor(task.assignedTo.name)"
+                           [matTooltip]="task.assignedTo.name">
+                        {{ task.assignedTo.name.charAt(0).toUpperCase() }}
+                      </div>
+                    </div>
+                    <div class="due-date" 
+                         *ngIf="task.dueDate" 
+                         [ngClass]="{ 'overdue': isOverdue(task.dueDate) }">
+                      <mat-icon>schedule</mat-icon>
+                      <span>{{ task.dueDate | date:'MMM d' }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="add-task-btn" mat-stroked-button (click)="createTask(status.value)">
+                  <mat-icon>add</mat-icon>
+                  Add Task
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- List View -->
+          <div class="list-view" *ngIf="currentView === 'list'">
+            <div class="list-header">
+              <div class="list-column">Task</div>
+              <div class="list-column">Status</div>
+              <div class="list-column">Priority</div>
+              <div class="list-column">Assignee</div>
+              <div class="list-column">Due Date</div>
+              <div class="list-column">Actions</div>
+            </div>
+            
+            <div class="list-item" *ngFor="let task of tasks" (click)="viewTask(task._id)">
+              <div class="list-column task-info">
+                <h4 class="list-task-title">{{ task.title }}</h4>
+                <p class="list-task-description" *ngIf="task.description">{{ task.description }}</p>
+                <div class="task-tags" *ngIf="task.tags?.length">
+                  <span class="tag" *ngFor="let tag of task.tags?.slice(0, 2)">{{ tag }}</span>
+                  <span class="tag more" *ngIf="task.tags && task.tags.length > 2">+{{ task.tags.length - 2 }}</span>
+                </div>
+              </div>
+              
+              <div class="list-column">
+                <div class="status-badge" [ngClass]="'status-' + task.status">
+                  <div class="status-indicator" [ngClass]="'status-' + task.status"></div>
+                  {{ getStatusLabel(task.status) }}
+                </div>
+              </div>
+              
+              <div class="list-column">
+                <div class="priority-badge" [ngClass]="'priority-' + (task.priority || 'medium')" *ngIf="task.priority">
+                  <mat-icon>{{ getPriorityIcon(task.priority) }}</mat-icon>
+                  {{ task.priority | titlecase }}
+                </div>
+              </div>
+              
+              <div class="list-column">
+                <div class="assignee-info" *ngIf="task.assignedTo">
+                  <div class="assignee-avatar" 
+                       [style.background-color]="getAvatarColor(task.assignedTo.name)">
+                    {{ task.assignedTo.name.charAt(0).toUpperCase() }}
+                  </div>
+                  <span class="assignee-name">{{ task.assignedTo.name }}</span>
+                </div>
+                <span *ngIf="!task.assignedTo" class="unassigned">Unassigned</span>
+              </div>
+              
+              <div class="list-column">
+                <div class="due-date" 
+                     *ngIf="task.dueDate" 
+                     [ngClass]="{ 'overdue': isOverdue(task.dueDate) }">
+                  <mat-icon>schedule</mat-icon>
+                  <span>{{ task.dueDate | date:'MMM d, y' }}</span>
+                </div>
+                <span *ngIf="!task.dueDate" class="no-date">No due date</span>
+              </div>
+              
+              <div class="list-column actions">
+                <button mat-icon-button 
+                        (click)="$event.stopPropagation(); editTask(task)" 
+                        style="width: 24px; height: 24px; min-width: 24px; flex-shrink: 0; padding: 0; display: flex; align-items: center; justify-content: center;">
+                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Team Tab -->
+      <mat-tab label="Team">
+        <div class="tab-content">
+          <div class="section-header">
+            <h2>Team Members</h2>
+            <button mat-flat-button color="primary" (click)="inviteMembers()">
+              <mat-icon>person_add</mat-icon>
+              Invite Members
+            </button>
+          </div>
+
+          <div class="team-grid">
+            <div class="member-card" *ngFor="let member of members">
+              <div class="member-avatar" [style.background-color]="getAvatarColor(member.user?.name || member.name)">
+                {{ (member.user?.name || member.name)?.charAt(0).toUpperCase() }}
+              </div>
+              <div class="member-info">
+                <h4 class="member-name">{{ member.user?.name || member.name }}</h4>
+                <p class="member-email">{{ member.user?.email || member.email }}</p>
+                <span class="member-role">{{ member.role | titlecase }}</span>
+              </div>
+              <button mat-icon-button 
+                      [matMenuTriggerFor]="memberMenu" 
+                      [disabled]="!canModifyMember(member)">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #memberMenu="matMenu">
+                <button mat-menu-item 
+                        [matMenuTriggerFor]="roleMenu"
+                        [disabled]="!canModifyMember(member)"
+                        [class.disabled-item]="!canModifyMember(member)">
+                  <mat-icon>edit</mat-icon>
+                  Change Role
+                </button>
+                <button mat-menu-item 
+                        class="danger-item" 
+                        (click)="removeMember(member)"
+                        [disabled]="member.role === 'owner' || isCurrentUser(member)"
+                        [class.disabled-item]="member.role === 'owner' || isCurrentUser(member)">
+                  <mat-icon>person_remove</mat-icon>
+                  Remove
+                </button>
+              </mat-menu>
+              <mat-menu #roleMenu="matMenu">
+                <button mat-menu-item 
+                        (click)="updateMemberRole(member, 'viewer')"
+                        [disabled]="!canModifyMember(member)"
+                        [class.disabled-item]="!canModifyMember(member)">
+                  <mat-icon>visibility</mat-icon>
+                  Viewer
+                </button>
+                <button mat-menu-item 
+                        (click)="updateMemberRole(member, 'developer')"
+                        [disabled]="!canModifyMember(member)"
+                        [class.disabled-item]="!canModifyMember(member)">
+                  <mat-icon>code</mat-icon>
+                  Developer
+                </button>
+                <button mat-menu-item 
+                        (click)="updateMemberRole(member, 'manager')"
+                        [disabled]="!canModifyMember(member)"
+                        [class.disabled-item]="!canModifyMember(member)">
+                  <mat-icon>supervisor_account</mat-icon>
+                  Manager
+                </button>
+                <button mat-menu-item 
+                        (click)="updateMemberRole(member, 'admin')"
+                        [disabled]="!canModifyMember(member)"
+                        [class.disabled-item]="!canModifyMember(member)">
+                  <mat-icon>admin_panel_settings</mat-icon>
+                  Admin
+                </button>
+                <!-- Owner role only available to current owner -->
+                <button mat-menu-item 
+                        (click)="updateMemberRole(member, 'owner')"
+                        [disabled]="!isOwner() || isCurrentUser(member)"
+                        [class.disabled-item]="!isOwner() || isCurrentUser(member)"
+                        *ngIf="isOwner() && !isCurrentUser(member)">
+                  <mat-icon>star</mat-icon>
+                  Owner
+                </button>
+              </mat-menu>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Overview Tab -->
+      <mat-tab label="Overview">
+        <div class="tab-content">
+          <div class="overview-grid">
+            <mat-card class="overview-card">
+              <mat-card-header>
+                <mat-card-title>Project Details</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="detail-row">
+                  <span class="label">Status:</span>
+                  <mat-chip class="status-chip" [ngClass]="'status-' + project.status">
+                    {{ project.status | titlecase }}
+                  </mat-chip>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Priority:</span>
+                  <mat-chip class="priority-chip" [ngClass]="'priority-' + project.priority">
+                    {{ project.priority | titlecase }}
+                  </mat-chip>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Start Date:</span>
+                  <span>{{ project.startDate | date:'MMM d, y' }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">End Date:</span>
+                  <span>{{ project.endDate | date:'MMM d, y' }}</span>
+                </div>
+                <div class="detail-row" *ngIf="project.budget">
+                  <span class="label">Budget:</span>
+                  <span>${{ project.budget | number:'1.0-0' }}</span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="overview-card">
+              <mat-card-header>
+                <mat-card-title>Task Summary</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="task-summary">
+                  <div class="summary-item" *ngFor="let status of taskStatuses">
+                    <div class="summary-label">
+                      <div class="status-dot" [ngClass]="'status-' + status.value"></div>
+                      {{ status.label }}
+                    </div>
+                    <span class="summary-count">{{ getTasksByStatus(status.value).length }}</span>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </main>
+</div>
+
+<!-- Loading State -->
+<div class="loading-state" *ngIf="isLoading">
+  <div class="loading-content">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Loading project details...</p>
+  </div>
+</div>

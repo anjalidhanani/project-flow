@@ -1,0 +1,66 @@
+<div class="team-container">
+  <div class="team-header">
+    <h2>
+      <mat-icon>groups</mat-icon>
+      Team Members
+    </h2>
+    <p class="team-subtitle">View all team members across your projects</p>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading team members...</p>
+  </div>
+
+  <div *ngIf="!isLoading && teamMembers.length === 0" class="empty-state">
+    <mat-icon class="empty-icon">group_off</mat-icon>
+    <h3>No Team Members Found</h3>
+    <p>You don't have any team members in your projects yet.</p>
+  </div>
+
+  <div *ngIf="!isLoading && teamMembers.length > 0" class="team-grid">
+    <mat-card *ngFor="let member of teamMembers" class="member-card">
+      <mat-card-header>
+        <div mat-card-avatar class="member-avatar" [style.background-color]="getAvatarColor(member.name)">
+          <span *ngIf="!member.avatar">{{ getInitials(member.name) }}</span>
+          <img *ngIf="member.avatar" [src]="member.avatar" [alt]="member.name">
+        </div>
+        <mat-card-title>{{ member.name }}</mat-card-title>
+        <mat-card-subtitle>{{ member.email }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="member-info">
+          <div class="primary-role">
+            <mat-icon [style.color]="getRoleColor(member.primaryRole)">
+              {{ getRoleIcon(member.primaryRole) }}
+            </mat-icon>
+            <span class="role-text">{{ member.primaryRole | titlecase }}</span>
+          </div>
+
+          <div class="project-count" matTooltip="Number of shared projects">
+            <mat-icon>folder</mat-icon>
+            <span>{{ member.projectCount }} project{{ member.projectCount !== 1 ? 's' : '' }}</span>
+          </div>
+        </div>
+
+        <div class="projects-section" *ngIf="member.projects.length > 0">
+          <h4>Shared Projects:</h4>
+          <div class="projects-list">
+            <mat-chip-listbox>
+              <mat-chip-option 
+                *ngFor="let project of member.projects" 
+                [matTooltip]="'Role: ' + (project.role | titlecase)"
+                class="project-chip">
+                {{ project.name }}
+                <mat-icon matChipTrailingIcon [style.color]="getRoleColor(project.role)">
+                  {{ getRoleIcon(project.role) }}
+                </mat-icon>
+              </mat-chip-option>
+            </mat-chip-listbox>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
