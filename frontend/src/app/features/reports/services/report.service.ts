@@ -100,7 +100,7 @@ export class ReportService {
     return this.http.post<any>(`${this.apiUrl}/custom`, filters);
   }
 
-  exportReport(reportType: string, format: 'pdf' | 'csv', filters?: any): Observable<Blob> {
+  exportReport(reportType: string, format: 'csv', filters?: any): Observable<Blob> {
     return this.http.post(`${this.apiUrl}/export`, {
       reportType,
       format,

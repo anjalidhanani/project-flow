@@ -554,8 +554,8 @@ router.put('/:id/comments/:commentId', [
       return res.status(403).json({ message: 'Access denied to this task' });
     }
 
-    // Find the comment
-    const comment = await TaskComment.findById(commentId);
+    // Find the comment and populate author for permission check
+    const comment = await TaskComment.findById(commentId).populate('author', '_id');
     if (!comment) {
       return res.status(404).json({ message: 'Comment not found' });
     }

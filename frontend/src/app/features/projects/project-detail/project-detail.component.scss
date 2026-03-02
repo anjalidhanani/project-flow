@@ -884,3 +884,60 @@
     height: 0.875rem;
   }
 }
+
+// Drag and Drop Styling
+.task-list {
+  min-height: 60px;
+  transition: background-color 0.2s ease;
+  
+  &.cdk-drop-list-dragging {
+    .task-card:not(.cdk-drag-placeholder) {
+      transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+    }
+  }
+  
+  &.cdk-drop-list-receiving {
+    background-color: #f0f9ff;
+    border-radius: 8px;
+  }
+}
+
+.task-card {
+  cursor: grab;
+  transition: all 0.2s ease;
+  
+  &.cdk-drag-preview {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    cursor: grabbing;
+    transform: rotate(2deg);
+  }
+  
+  &.cdk-drag-placeholder {
+    opacity: 0.4;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &::after {
+      content: 'Drop task here';
+      color: #94a3b8;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+  }
+  
+  &.cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+  
+  &:active {
+    cursor: grabbing;
+  }
+}

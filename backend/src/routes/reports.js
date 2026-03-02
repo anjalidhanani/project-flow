@@ -6,6 +6,7 @@ const Task = require('../models/Task');
 const User = require('../models/User');
 const Comment = require('../models/Comment');
 const ProjectMember = require('../models/ProjectMember');
+const { Parser } = require('json2csv');
 
 // Get dashboard summary
 router.get('/dashboard-summary', auth, async (req, res) => {
@@ -497,34 +498,236 @@ router.post('/custom', auth, async (req, res) => {
   }
 });
 
-// Export report (placeholder - would need additional libraries for PDF/CSV generation)
+// Export report with CSV generation
 router.post('/export', auth, async (req, res) => {
   try {
     const { reportType, format, filters } = req.body;
+    const userId = req.user._id;
 
-    // This is a placeholder implementation
-    // In a real application, you would use libraries like:
-    // - PDFKit or Puppeteer for PDF generation
-    // - csv-writer or json2csv for CSV generation
+    // Get user's projects
+    const userProjects = await ProjectMember.find({ user: userId }).populate('project');
+    const projectIds = userProjects.map(pm => pm.project._id);
+
+    let reportData = [];
+    let reportTitle = '';
+
+    // Generate report data based on type
+    if (reportType === 'project-progress') {
+      reportTitle = 'Project Progress Report';
+      
+      // Filter by specific projects if provided
+      let targetProjectIds = projectIds;
+      if (filters?.projectIds && filters.projectIds.length > 0) {
+        targetProjectIds = projectIds.filter(id => 
+          filters.projectIds.includes(id.toString())
+        );
+      }
+
+      for (const projectId of targetProjectIds) {
+        const project = await Project.findById(projectId);
+        if (!project) continue;
+
+        const allTasks = await Task.find({ project: projectId });
+        const totalTasks = allTasks.length;
+        const completedTasks = allTasks.filter(task => task.status === 'completed').length;
+        const inProgressTasks = allTasks.filter(task => task.status === 'in-progress').length;
+        const pendingTasks = allTasks.filter(task => task.status === 'todo').length;
+        const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+        const now = new Date();
+        const overdueTasks = allTasks.filter(task => 
+          task.dueDate && new Date(task.dueDate) < now && task.status !== 'completed'
+        ).length;
+
+        reportData.push({
+          'Project Name': project.name,
+          'Total Tasks': totalTasks,
+          'Completed Tasks': completedTasks,
+          'In Progress Tasks': inProgressTasks,
+          'Pending Tasks': pendingTasks,
+          'Completion Percentage': `${completionPercentage}%`,
+          'Overdue Tasks': overdueTasks,
+          'Project Status': project.status,
+          'Start Date': project.startDate ? new Date(project.startDate).toLocaleDateString() : 'N/A',
+          'End Date': project.endDate ? new Date(project.endDate).toLocaleDateString() : 'N/A',
+          'Created Date': new Date(project.createdAt).toLocaleDateString()
+        });
+      }
+    } else if (reportType === 'task-analytics') {
+      reportTitle = 'Task Analytics Report';
+      
+      let query = { project: { $in: projectIds } };
+      
+      // Apply filters
+      if (filters?.dateRange) {
+        if (filters.dateRange.startDate && filters.dateRange.endDate) {
+          query.createdAt = {
+            $gte: new Date(filters.dateRange.startDate),
+            $lte: new Date(filters.dateRange.endDate)
+          };
+        }
+      }
+
+      const tasks = await Task.find(query)
+        .populate('assignedTo', 'name email')
+        .populate('project', 'name')
+        .sort({ createdAt: -1 });
+
+      reportData = tasks.map(task => ({
+        'Task Title': task.title,
+        'Description': task.description || 'N/A',
+        'Status': task.status,
+        'Priority': task.priority,
+        'Assigned To': task.assignedTo ? task.assignedTo.name : 'Unassigned',
+        'Project': task.project.name,
+        'Due Date': task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A',
+        'Created Date': new Date(task.createdAt).toLocaleDateString(),
+        'Updated Date': new Date(task.updatedAt).toLocaleDateString()
+      }));
+    } else if (reportType === 'user-activity') {
+      reportTitle = 'User Activity Report';
+      
+      // Get all project members from user's projects
+      let projectMembers = await ProjectMember.find({ 
+        project: { $in: projectIds } 
+      }).populate('user', 'name email lastLogin');
+
+      // Remove duplicate users
+      const uniqueUsers = new Map();
+      projectMembers.forEach(member => {
+        if (member.user && !uniqueUsers.has(member.user._id.toString())) {
+          uniqueUsers.set(member.user._id.toString(), member.user);
+        }
+      });
+
+      // Filter by specific users if provided
+      let usersToProcess = Array.from(uniqueUsers.values());
+      if (filters?.userIds && filters.userIds.length > 0) {
+        usersToProcess = usersToProcess.filter(user => 
+          filters.userIds.includes(user._id.toString())
+        );
+      }
+
+      for (const user of usersToProcess) {
+        if (!user) continue;
+
+        // Get tasks assigned to this user
+        const assignedTasks = await Task.find({ 
+          assignedTo: user._id,
+          project: { $in: projectIds }
+        });
+
+        const tasksAssigned = assignedTasks.length;
+        const tasksCompleted = assignedTasks.filter(task => task.status === 'completed').length;
+
+        // Get projects this user is involved in
+        const userProjectMemberships = await ProjectMember.find({ user: user._id });
+        const projectsInvolved = userProjectMemberships.length;
+
+        // Get comments posted by this user
+        const commentsPosted = await Comment.countDocuments({ 
+          author: user._id,
+          project: { $in: projectIds }
+        });
+
+        // Calculate productivity score
+        let productivityScore = 0;
+        if (tasksAssigned > 0) {
+          const completionRate = (tasksCompleted / tasksAssigned) * 100;
+          const activityBonus = Math.min(commentsPosted * 2, 20);
+          productivityScore = Math.min(Math.round(completionRate + activityBonus), 100);
+        }
+
+        const completionRate = tasksAssigned > 0 ? Math.round((tasksCompleted / tasksAssigned) * 100) : 0;
+
+        reportData.push({
+          'User Name': user.name,
+          'Email': user.email,
+          'Tasks Assigned': tasksAssigned,
+          'Tasks Completed': tasksCompleted,
+          'Completion Rate': `${completionRate}%`,
+          'Projects Involved': projectsInvolved,
+          'Comments Posted': commentsPosted,
+          'Productivity Score': `${productivityScore}%`,
+          'Last Activity': user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'N/A'
+        });
+      }
+    } else if (reportType === 'custom') {
+      reportTitle = 'Custom Report';
+      
+      // Build query based on filters
+      let query = { project: { $in: projectIds } };
+      
+      // Apply date range filter
+      if (filters?.dateRange) {
+        if (filters.dateRange.startDate && filters.dateRange.endDate) {
+          query.createdAt = {
+            $gte: new Date(filters.dateRange.startDate),
+            $lte: new Date(filters.dateRange.endDate)
+          };
+        }
+      }
+      
+      // Apply project filter
+      if (filters?.projectIds && filters.projectIds.length > 0) {
+        const filteredProjectIds = projectIds.filter(id => 
+          filters.projectIds.includes(id.toString())
+        );
+        query.project = { $in: filteredProjectIds };
+      }
+      
+      // Apply status filter
+      if (filters?.statuses && filters.statuses.length > 0) {
+        query.status = { $in: filters.statuses };
+      }
+      
+      // Apply priority filter
+      if (filters?.priorities && filters.priorities.length > 0) {
+        query.priority = { $in: filters.priorities };
+      }
+      
+      // Apply assignee filter
+      if (filters?.assigneeIds && filters.assigneeIds.length > 0) {
+        query.assignedTo = { $in: filters.assigneeIds };
+      }
+      
+      // Get tasks based on filters
+      const tasks = await Task.find(query)
+        .populate('assignedTo', 'name email')
+        .populate('project', 'name')
+        .sort({ createdAt: -1 });
+      
+      reportData = tasks.map(task => ({
+        'Task Title': task.title,
+        'Description': task.description || 'N/A',
+        'Status': task.status,
+        'Priority': task.priority,
+        'Assigned To': task.assignedTo ? task.assignedTo.name : 'Unassigned',
+        'Assignee Email': task.assignedTo ? task.assignedTo.email : 'N/A',
+        'Project': task.project.name,
+        'Due Date': task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A',
+        'Created Date': new Date(task.createdAt).toLocaleDateString(),
+        'Updated Date': new Date(task.updatedAt).toLocaleDateString()
+      }));
+    }
 
     if (format === 'csv') {
-      // Generate CSV content
-      const csvContent = 'Report Type,Generated At\n' + 
-                        `${reportType},${new Date().toISOString()}`;
+      // Generate CSV
+      if (reportData.length === 0) {
+        return res.status(400).json({ message: 'No data available for export' });
+      }
+
+      const parser = new Parser();
+      const csv = parser.parse(reportData);
       
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', `attachment; filename="${reportType}-report.csv"`);
-      res.send(csvContent);
-    } else if (format === 'pdf') {
-      // Generate PDF content (placeholder)
-      const pdfContent = `Report: ${reportType}\nGenerated: ${new Date().toISOString()}`;
+      res.send(csv);
       
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="${reportType}-report.pdf"`);
-      res.send(Buffer.from(pdfContent));
     } else {
-      res.status(400).json({ message: 'Unsupported export format' });
+      res.status(400).json({ message: 'Unsupported export format. Only "csv" is supported.' });
     }
+    
   } catch (error) {
     console.error('Error exporting report:', error);
     res.status(500).json({ message: 'Error exporting report', error: error.message });

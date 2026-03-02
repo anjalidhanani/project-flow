@@ -231,11 +231,7 @@ import { Router } from '@angular/router';
                   </button>
                   
                   <div class="export-options" *ngIf="reportGenerated && !generating">
-                    <button mat-raised-button color="accent" (click)="exportReport('pdf')">
-                      <mat-icon>picture_as_pdf</mat-icon>
-                      Export PDF
-                    </button>
-                    <button mat-raised-button color="accent" (click)="exportReport('csv')">
+                    <button mat-raised-button color="primary" (click)="exportReport('csv')">
                       <mat-icon>table_chart</mat-icon>
                       Export CSV
                     </button>
@@ -672,10 +668,10 @@ export class CustomReportsComponent implements OnInit {
     });
   }
 
-  exportReport(format: 'pdf' | 'csv') {
+  exportReport(format: 'csv') {
     const filters = this.buildCustomFilters();
     
-    this.reportService.exportReport('custom', format, filters).subscribe({
+    this.reportService.exportReport('custom', format as 'csv', filters).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');

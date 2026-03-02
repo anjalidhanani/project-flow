@@ -36,11 +36,7 @@ import { Router } from '@angular/router';
           <h1>Project Progress Reports</h1>
         </div>
         <div class="actions">
-          <button mat-raised-button color="primary" (click)="exportReport('pdf')">
-            <mat-icon>picture_as_pdf</mat-icon>
-            Export PDF
-          </button>
-          <button mat-raised-button color="accent" (click)="exportReport('csv')">
+          <button mat-raised-button color="primary" (click)="exportReport('csv')">
             <mat-icon>table_chart</mat-icon>
             Export CSV
           </button>
@@ -160,8 +156,8 @@ import { Router } from '@angular/router';
           </mat-card-content>
           
           <mat-card-actions>
-            <button mat-button color="primary">View Details</button>
-            <button mat-button>View Tasks</button>
+            <button mat-button color="primary" (click)="viewProjectDetails(report.projectId)">View Details</button>
+            <button mat-button (click)="viewProjectTasks(report.projectId)">View Tasks</button>
           </mat-card-actions>
         </mat-card>
       </div>
@@ -610,7 +606,7 @@ export class ProjectProgressComponent implements OnInit {
       });
   }
 
-  exportReport(format: 'pdf' | 'csv') {
+  exportReport(format: 'csv') {
     this.reportService.exportReport('project-progress', format, {
       projectIds: this.selectedProjects
     }).subscribe({
@@ -654,5 +650,15 @@ export class ProjectProgressComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/reports']);
+  }
+
+  viewProjectDetails(projectId: string) {
+    this.router.navigate(['/projects', projectId]);
+  }
+
+  viewProjectTasks(projectId: string) {
+    this.router.navigate(['/projects', projectId], { 
+      queryParams: { tab: 'tasks' } 
+    });
   }
 }

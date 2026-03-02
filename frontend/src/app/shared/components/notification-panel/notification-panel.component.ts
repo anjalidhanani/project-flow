@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -39,7 +39,8 @@ export class NotificationPanelComponent implements OnInit, OnDestroy {
     private systemNotificationService: SystemNotificationService,
     private invitationService: InvitationService,
     private notificationService: NotificationService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -142,17 +143,22 @@ export class NotificationPanelComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Immediately update the notification status in the UI
+    this.updateNotificationStatusImmediately(notification, 'accepted');
+
     this.invitationService.acceptInvitation(notification.data.invitationId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           this.notificationService.showSuccess(`Successfully joined ${response.project.name}!`);
           this.markAsRead(notification._id);
-          this.loadNotifications(); // Refresh notifications
+          // Don't reload notifications since we already updated the UI
         },
         error: (error) => {
           console.error('Error accepting invitation:', error);
           this.notificationService.showError('Failed to accept invitation');
+          // Revert the UI change on error
+          this.updateNotificationStatusImmediately(notification, 'pending');
         }
       });
   }
@@ -164,17 +170,22 @@ export class NotificationPanelComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Immediately update the notification status in the UI
+    this.updateNotificationStatusImmediately(notification, 'declined');
+
     this.invitationService.declineInvitation(notification.data.invitationId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           this.notificationService.showInfo(`Declined invitation to ${response.project.name}`);
           this.markAsRead(notification._id);
-          this.loadNotifications(); // Refresh notifications
+          // Don't reload notifications since we already updated the UI
         },
         error: (error) => {
           console.error('Error declining invitation:', error);
           this.notificationService.showError('Failed to decline invitation');
+          // Revert the UI change on error
+          this.updateNotificationStatusImmediately(notification, 'pending');
         }
       });
   }
@@ -237,6 +248,35 @@ export class NotificationPanelComponent implements OnInit, OnDestroy {
     }
   }
 
+  private updateNotificationStatusImmediately(notification: SystemNotification, status: 'accepted' | 'declined' | 'pending'): void {
+    console.log('Updating notification status immediately:', notification._id, 'to', status);
+    console.log('Current notification data:', notification.data);
+    
+    // Find and update the specific notification
+    const notificationIndex = this.notifications.findIndex(n => n._id === notification._id);
+    if (notificationIndex !== -1) {
+      // Create a completely new array to ensure Angular detects the change
+      const updatedNotifications = [...this.notifications];
+      updatedNotifications[notificationIndex] = {
+        ...this.notifications[notificationIndex],
+        data: { 
+          ...this.notifications[notificationIndex].data, 
+          status: status 
+        },
+        isRead: status !== 'pending' ? true : this.notifications[notificationIndex].isRead,
+        readAt: status !== 'pending' ? new Date() : this.notifications[notificationIndex].readAt
+      };
+      
+      this.notifications = updatedNotifications;
+      console.log('Updated notification data:', this.notifications[notificationIndex].data);
+      console.log('All notifications after update:', this.notifications.map(n => ({ id: n._id, status: n.data?.status })));
+    }
+    
+    // Force change detection to update UI immediately
+    this.cdr.detectChanges();
+    console.log('Change detection triggered');
+  }
+
   getAvatarColor(name: string): string {
     const colors = [
       '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
@@ -244,5 +284,18 @@ export class NotificationPanelComponent implements OnInit, OnDestroy {
     ];
     const index = name.charCodeAt(0) % colors.length;
     return colors[index];
+  }
+
+  // Debug method to check what template sees
+  shouldShowButtons(notification: SystemNotification): boolean {
+    const shouldShow = !notification.data?.status || notification.data?.status === 'pending';
+    console.log(`Should show buttons for ${notification._id}:`, shouldShow, 'Status:', notification.data?.status);
+    return shouldShow;
+  }
+
+  shouldShowStatus(notification: SystemNotification): boolean {
+    const shouldShow = notification.data?.status && notification.data?.status !== 'pending';
+    console.log(`Should show status for ${notification._id}:`, shouldShow, 'Status:', notification.data?.status);
+    return shouldShow;
   }
 }

@@ -9,6 +9,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskService, Task } from '../../../core/services/task.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { TaskEditDialogComponent } from '../task-edit-dialog/task-edit-dialog.component';
 import { Subject, takeUntil, filter } from 'rxjs';
 import { Location } from '@angular/common';
@@ -752,6 +753,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private taskService: TaskService,
     private notificationService: NotificationService,
+    private authService: AuthService,
     private dialog: MatDialog,
     private location: Location,
     private fb: FormBuilder
@@ -927,9 +929,11 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   }
 
   canEditComment(comment: TaskComment): boolean {
-    // For now, allow editing own comments - you can add more logic here
-    // This would typically check if current user is the author
-    return true;
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) return false;
+    
+    // Check if current user is the author of the comment
+    return comment.author._id === currentUser.id;
   }
 
   trackByCommentId(index: number, comment: TaskComment): string {

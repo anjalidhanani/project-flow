@@ -68,24 +68,43 @@
 
           <!-- Project Invitation Actions -->
           <div 
-            *ngIf="notification.type === 'project_invitation' && !notification.isRead" 
+            *ngIf="notification.type === 'project_invitation'" 
             class="invitation-actions"
             (click)="$event.stopPropagation()">
-            <button 
-              mat-flat-button 
-              color="primary"
-              (click)="acceptInvitation(notification, $event)"
-              class="accept-btn">
-              <mat-icon>check</mat-icon>
-              Accept
-            </button>
-            <button 
-              mat-stroked-button
-              (click)="declineInvitation(notification, $event)"
-              class="decline-btn">
-              <mat-icon>close</mat-icon>
-              Decline
-            </button>
+            
+            <!-- Debug info -->
+            <div style="font-size: 10px; color: #999; margin-bottom: 8px;">
+              Debug: status = "{{ notification.data?.status || 'undefined' }}"
+            </div>
+            
+            <!-- Show buttons only if status is pending or undefined -->
+            <div *ngIf="shouldShowButtons(notification)">
+              <button 
+                mat-flat-button 
+                color="primary"
+                (click)="acceptInvitation(notification, $event)"
+                class="accept-btn">
+                <mat-icon>check</mat-icon>
+                Accept
+              </button>
+              <button 
+                mat-stroked-button
+                (click)="declineInvitation(notification, $event)"
+                class="decline-btn">
+                <mat-icon>close</mat-icon>
+                Decline
+              </button>
+            </div>
+            
+            <!-- Show status text when invitation has been responded to -->
+            <div *ngIf="shouldShowStatus(notification)" class="invitation-status">
+              <mat-icon [ngClass]="'status-' + notification.data.status">
+                {{ notification.data.status === 'accepted' ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+              <span class="status-text" [ngClass]="'status-' + notification.data.status">
+                {{ notification.data.status === 'accepted' ? 'Accepted' : 'Declined' }}
+              </span>
+            </div>
           </div>
 
           <!-- Read status indicator -->

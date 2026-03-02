@@ -117,7 +117,7 @@
 
   <!-- Main Content -->
   <main class="main-content">
-    <mat-tab-group class="content-tabs" animationDuration="200ms">
+    <mat-tab-group class="content-tabs" animationDuration="200ms" [selectedIndex]="selectedTabIndex">
       <!-- Tasks Tab -->
       <mat-tab label="Tasks">
         <div class="tab-content">
@@ -161,9 +161,16 @@
                 </mat-menu>
               </div>
 
-              <div class="task-list">
+              <div class="task-list" 
+                   cdkDropList
+                   [cdkDropListData]="getTasksByStatus(status.value)"
+                   [cdkDropListConnectedTo]="getConnectedLists()"
+                   [id]="getTaskListId(status.value)"
+                   (cdkDropListDropped)="onTaskDrop($event, status.value)">
                 <div class="task-card" 
                      *ngFor="let task of getTasksByStatus(status.value)" 
+                     cdkDrag
+                     [cdkDragData]="task"
                      (click)="viewTask(task._id)">
                   <div class="task-header">
                     <h4 class="task-title">{{ task.title }}</h4>

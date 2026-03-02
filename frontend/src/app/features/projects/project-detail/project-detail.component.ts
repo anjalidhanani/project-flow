@@ -1,10 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
 import { Location } from '@angular/common';
-
-// Angular Material Imports
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,30 +12,15 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
-import { InviteMemberDialogComponent } from '../invite-member-dialog/invite-member-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-
-// Services
+import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { Subject, takeUntil } from 'rxjs';
 import { ProjectService } from '../../../core/services/project.service';
-import { TaskService } from '../../../core/services/task.service';
+import { TaskService, Task } from '../../../core/services/task.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { TaskEditDialogComponent } from '../../tasks/task-edit-dialog/task-edit-dialog.component';
-
-// Define Task interface locally
-interface Task {
-  _id: string;
-  title: string;
-  description?: string;
-  status: string;
-  priority: string;
-  dueDate?: string;
-  assignedTo?: {
-    name: string;
-    email: string;
-  };
-  tags?: string[];
-}
+import { InviteMemberDialogComponent } from '../invite-member-dialog/invite-member-dialog.component';
 
 @Component({
   selector: 'app-project-detail',
@@ -54,7 +36,8 @@ interface Task {
     MatMenuModule,
     MatTooltipModule,
     MatBadgeModule,
-    MatDividerModule
+    MatDividerModule,
+    DragDropModule
   ],
   templateUrl: './project-detail.component.html',
   styleUrls: ['./project-detail.component.scss']
@@ -74,6 +57,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
   ];
 
   currentView: 'kanban' | 'list' = 'kanban';
+  selectedTabIndex = 0;
 
   constructor(
     private route: ActivatedRoute,
@@ -88,6 +72,17 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const projectId = this.route.snapshot.paramMap.get('id');
+    
+    // Handle tab query parameter
+    const tabParam = this.route.snapshot.queryParamMap.get('tab');
+    if (tabParam === 'tasks') {
+      this.selectedTabIndex = 0; // Tasks tab
+    } else if (tabParam === 'team') {
+      this.selectedTabIndex = 1; // Team tab
+    } else if (tabParam === 'overview') {
+      this.selectedTabIndex = 2; // Overview tab
+    }
+    
     if (projectId) {
       // Check if user is authenticated before loading project
       this.authService.isAuthenticated$
@@ -282,8 +277,10 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     return colors[Math.abs(hash) % colors.length];
   }
 
-  isOverdue(dueDate: string): boolean {
-    return new Date(dueDate) < new Date();
+  isOverdue(dueDate: string | Date): boolean {
+    if (!dueDate) return false;
+    const due = typeof dueDate === 'string' ? new Date(dueDate) : dueDate;
+    return due < new Date();
   }
 
   trackByStatus(index: number, status: any): string {
@@ -354,5 +351,69 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
           }
         });
     }
+  }
+
+  onTaskDrop(event: CdkDragDrop<Task[]>, newStatus: string): void {
+    const task = event.item.data as Task;
+    const previousStatus = task.status;
+
+    if (event.previousContainer === event.container) {
+      // Same column - just reorder position
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      
+      // Update position in backend
+      this.taskService.updateTaskPosition(task._id, event.currentIndex)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            // Position updated successfully
+          },
+          error: (error) => {
+            console.error('Error updating task position:', error);
+            // Revert the move on error
+            moveItemInArray(event.container.data, event.currentIndex, event.previousIndex);
+            this.notificationService.showError('Failed to update task position');
+          }
+        });
+    } else {
+      // Different column - update status and position
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex
+      );
+
+      // Update task status and position in backend
+      this.taskService.updateTaskPosition(task._id, event.currentIndex, newStatus)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            // Update local task object with new status
+            task.status = newStatus as 'todo' | 'in-progress' | 'review' | 'completed';
+            this.notificationService.showSuccess(`Task moved to ${this.getStatusLabel(newStatus)}`);
+          },
+          error: (error) => {
+            console.error('Error updating task status:', error);
+            // Revert the move on error
+            transferArrayItem(
+              event.container.data,
+              event.previousContainer.data,
+              event.currentIndex,
+              event.previousIndex
+            );
+            task.status = previousStatus;
+            this.notificationService.showError('Failed to move task');
+          }
+        });
+    }
+  }
+
+  getTaskListId(status: string): string {
+    return `task-list-${status}`;
+  }
+
+  getConnectedLists(): string[] {
+    return this.taskStatuses.map(status => this.getTaskListId(status.value));
   }
 }

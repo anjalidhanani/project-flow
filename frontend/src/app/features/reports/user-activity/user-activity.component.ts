@@ -38,11 +38,7 @@ import { Router } from '@angular/router';
           <h1>User Activity Reports</h1>
         </div>
         <div class="actions">
-          <button mat-raised-button color="primary" (click)="exportReport('pdf')">
-            <mat-icon>picture_as_pdf</mat-icon>
-            Export PDF
-          </button>
-          <button mat-raised-button color="accent" (click)="exportReport('csv')">
+          <button mat-raised-button color="primary" (click)="exportReport('csv')">
             <mat-icon>table_chart</mat-icon>
             Export CSV
           </button>
@@ -887,7 +883,7 @@ export class UserActivityComponent implements OnInit {
       });
   }
 
-  exportReport(format: 'pdf' | 'csv') {
+  exportReport(format: 'csv') {
     this.reportService.exportReport('user-activity', format, {
       userIds: this.selectedUsers
     }).subscribe({

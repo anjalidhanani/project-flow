@@ -39,11 +39,7 @@ import { Router } from '@angular/router';
           <h1>Task Analytics</h1>
         </div>
         <div class="actions">
-          <button mat-raised-button color="primary" (click)="exportReport('pdf')">
-            <mat-icon>picture_as_pdf</mat-icon>
-            Export PDF
-          </button>
-          <button mat-raised-button color="accent" (click)="exportReport('csv')">
+          <button mat-raised-button color="primary" (click)="exportReport('csv')">
             <mat-icon>table_chart</mat-icon>
             Export CSV
           </button>
@@ -636,9 +632,9 @@ export class TaskAnalyticsComponent implements OnInit {
     this.loadAnalytics();
   }
 
-  exportReport(format: 'pdf' | 'csv') {
+  exportReport(format: 'csv') {
     const filters = this.buildFilters();
-    this.reportService.exportReport('task-analytics', format, filters).subscribe({
+    this.reportService.exportReport('task-analytics', format as 'csv', filters).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');

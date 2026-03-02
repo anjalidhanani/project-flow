@@ -56,7 +56,9 @@ taskCommentSchema.statics.getTaskComments = async function(taskId) {
 
 // Instance method to check if user can edit this comment
 taskCommentSchema.methods.canEdit = function(userId) {
-  return this.author._id.toString() === userId.toString();
+  // Handle both populated and non-populated author field
+  const authorId = this.author._id || this.author;
+  return authorId.toString() === userId.toString();
 };
 
 module.exports = mongoose.model('TaskComment', taskCommentSchema);
